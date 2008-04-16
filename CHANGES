@@ -1,0 +1,54 @@
+dbFacile - The easily used PHP Database Abstraction Class
+Copyright (C) 2007 Alan Szlosek
+
+----
+
+- fixed fetchKeyValue bug ($data[ $key ] = array_shift($row); on line 227)
+
+Version 0.3
+
+- prevent dbFacile::execute() from calling dbFacile::transformPlaceholders() unnecessarily
+- delete() method
+- transaction support for the following database drivers: mysql, mysqli, postgresql, sqlite
+- transactions around insert for guaranteeing the return of the correct unique id
+- prevent sql injection on update() where clause
+- insert() and update() will ignore fields from data array (first parameter) that don't exist in the table
+- where clause for update() is optional
+- not having previously tested the MySQL driver enough, i found a bug that prevented insert() from doing much of anything and fixed it. in the mysql driver class i incorrectly had it trying to extract the field name from the "Name" column of the "describe TABLE" results ... it should have been using "Field"
+- allow insert() parameters and first two update() parameters to be passed in any order (gives notice)
+- fetchKeyValue() performs differently when fetching more than two columns. See README.
+
+Version 0.2.1
+
+- fixed README typo
+
+Version 0.2
+
+- logToFile() for logging all queries to file
+- getFieldNames() returns array of field names
+- getFieldTypes() returns array of field names as keys, with their types as values. This only returns data type name, not the restrictions. It will return "varchar" not "varchar(50)".
+- ability to pass in connection handle (to constructor) or use existing connection
+	- make object more flexible, and constructor less puzzling (dangling DB type parameter)
+	- new dbFacile_mysql([connection handle]);
+	- $db->open(databaseName, username, password);
+- created driver classes for each supported database
+	- now: mssql, mysql, postgresql, sqlite
+	- makes it easier to extend to more databases
+	- hopefully means greater efficiency
+- ditched GPL in favor of MIT license
+
+
+Version 0.1.2
+
+- tested and fixed issue with MySql
+- insert()/update() now have accept an additional (optional) parameter for specifying fields that shouldn't be escaped and quoted. all others fields will be quoted and escaped by default
+- tested postgresql to ensure that insert() returns the new auto_increment value, if any
+- execute() and fetch*() accept extra params which replace question marks found in query the query string
+	- not a prepared statement, just an easier and more secure way to insert outside values into a query
+	- all values are quoted and escaped
+
+
+Version 0.1.1
+
+- postgresql support. possibly needs more testing.
+- update() returns number of affected rows

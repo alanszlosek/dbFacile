@@ -1,0 +1,33 @@
+- PDO driver
+- dbFacile:$instances to hold multiple instances
+- prepare core and driver classes for pulling schemas and foreign keys
+- cache schemas in some public static data structure
+	- include tables, fields, types, primary keys, foreign keys
+- reject invalid fields in insert() and update()
+- PostgreSQL
+- MSSQL
+- MySqli
+- quote table and field names in single-quotes or backticks
+
+
+FROM FUTURE FILE
+
+- quote all table and field references in single-quotes or backticks, whichever is appropriate for connected DB
+- table prefix to prepend to all tables (except for hand-typed queries)? might be too much work
+- getTables()
+- error out if don't have dbHandle
+- add static method to base class for instantiating driver classes. allows for more streamlined integration into ecommerce: call to base class should trigger __autoload which can load the file called dbFacile.php rather than trying to load dbFacile_mysql.php
+- check for valid tables passed to insert(), update(), delete()
+
+- return generated primary key on insert for mssql
+	- possibly use information_schema
+	- use scope_identity() ... needs testing
+	- http://msdn2.microsoft.com/en-us/library/ms190315.aspx
+- fetchRow to use limit for some DBs?
+- PDO for sqlite3
+- mssql table info
+	http://msdn2.microsoft.com/en-us/library/ms187752.aspx
+
+BAD IDEAS
+
+- fetchColumn implodes all columns in query and then appends to value array

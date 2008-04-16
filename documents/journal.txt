@@ -1,0 +1,33 @@
+2008-03-31
+
+Pulling foreign keys: http://dev.mysql.com/doc/refman/5.1/en/information-schema.html
+
+cache schema in dbFacile instance or statically? waht about multi db connections?
+
+2008-03-05
+
+Probably best to cache full schema info in orm
+
+2008-02-29
+
+It's seldom, but there is still the need for a database abstraction layer such as dbFacile to be usable for more that one database connection. And since everyone's afraid of globals, I have an idea. It's not revolutionary:
+
+* Create a static class variable
+* Call it "instance" or something
+* Each time a database is opened via "dbFacile::open(..)", save the instace that's created in dbFacile::instance[DATABASENAME].
+
+There would be clashes, however, if the database name is the same across both connections ... hmm.
+
+2008-02-06
+
+I want to encapsulate my implementation of the PDO placeholder transformation logic. That way, since we're going to default to trying to use PDO, it can be overridden or simply not used.
+
+I also want to ONLY replace the placeholders with actual escaped, quoted data in the call to execute. It will take two parameters: the query string and a parameters array.
+
+Make dbFacile->execute() return false if error, else number of affected rows?
+
+dbFacile::$tryPdo = true/false; for whether to try to use PDO over the native functions.
+
+The result returned from a fetch is basically a result set. It should have seek(), count(), and other methods.
+
+The main execute() method would pass the query and parameters off to _query(), which knows whether the query and params need to be combined into a final string or can be used as-is (in the case of PDO). So we need another method for makeQuery().

@@ -1,0 +1,2 @@
+test foreign-key discovery on mysql 5.1.10+
+more drivers

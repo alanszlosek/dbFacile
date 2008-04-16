@@ -1,0 +1,1 @@
+create table test (b integer auto_increment, c text, primary key(b));
