@@ -4,6 +4,7 @@ include('/home/switchprog/hg/dbFacile/dbFacile.php');
 
 $db = dbFacile::open('sqlite', '/home/switchprog/hg/dbFacile/testing/testing.db');
 $db->logToFile('db.log');
+$db->buildSchema();
 
 $create = false;
 

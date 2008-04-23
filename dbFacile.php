@@ -15,6 +15,8 @@ abstract class dbFacile {
 	protected $schemaNameField;
 	protected $schemaTypeField;
 	
+	protected $cache = array();
+	
 	public $schema = array(); // this will probably become protected
 	//public static $schemaCache; // filename to use when saving/reading full database schema cache
 	public static $instance; // last created instance
@@ -36,6 +38,7 @@ abstract class dbFacile {
 		$this->foreignKeys = array();
 		$this->reverseForeignKeys = null;
 		$this->logFile = null;
+		$this->schema = null;
 
 		dbFacile::$instance = $this;
 	}
@@ -74,7 +77,7 @@ abstract class dbFacile {
 		}
 	}
 
-	public function logToFile($file, $method = 'w+') {
+	public function logToFile($file, $method = 'a+') {
 		$this->logFile = fopen($file, $method);
 	}
 
@@ -86,11 +89,21 @@ abstract class dbFacile {
 		$this->query = $sql;
 		$this->parameters = $parameters;
 
+		$fullSql = $this->makeQuery($sql, $parameters);
+		/*
+		if(array_key_exists($fullSql, $this->cache)) {
+			$this->result = $this->cache[ $fullSql ];
+			$this->_rewind($this->result);
+			
+			return ($this->result !== false);
+		}
+		*/
+
 		if($this->logFile)
 			fwrite($this->logFile, date('Y-m-d H:i:s') . "\n" . $sql . "\n" . print_r($parameters, true) . "\n\n");
 
-		// query should probably return a result
-		$this->result = $this->_query($sql, $parameters); // sets $this->result
+		$this->result = $this->_query($fullSql); // sets $this->result
+		$this->cache[ $fullSql ] = $this->result;
 		if(!$this->result && (error_reporting() & 1))
 			die('dbFacile - Error in query: ' . $this->query . ' : ' . $this->_error());
 
@@ -591,8 +604,7 @@ class dbFacile_mysql extends dbFacile {
 		//$this->buildSchema();
 		return $this->connection;
 	}
-	protected function _query($sql, $parameters) {
-		$sql = $this->makeQuery($sql, $parameters);
+	protected function _query($sql) {
 		return mysql_query($sql, $this->connection);
 	}
 	protected function _escapeString($string) {
@@ -811,9 +823,13 @@ class dbFacile_sqlite extends dbFacile {
 		//$this->buildSchema();
 		return $this->connection;
 	}
-	protected function _query($sql, $parameters) {
+	protected function _query($sql) {
 		//var_dump($parameters);exit;
+		/*
 		$sql = $this->makeQuery($sql, $parameters);
+		if(array_key_exists($sql, $this->cache))
+			return $this->cache[ $sql ];
+		*/
 		return sqlite_query($this->connection, $sql);
 	}
 	protected function _escapeString($string) {
@@ -827,6 +843,9 @@ class dbFacile_sqlite extends dbFacile {
 	}
 	protected function _numberRows() {
 		return sqlite_num_rows($this->result);
+	}
+	protected function _rewind($result) {
+		sqlite_rewind($result);
 	}
 	protected function _fetch() {
 		return new dbFacile_sqlite_result($this->result);

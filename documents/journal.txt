@@ -1,3 +1,7 @@
+2008-04-16
+
+Need to solidify when dbFacile loads the schema. ORMer references this schema right away at each instantiation of an orm object...
+
 2008-03-31
 
 Pulling foreign keys: http://dev.mysql.com/doc/refman/5.1/en/information-schema.html
