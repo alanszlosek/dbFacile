@@ -14,8 +14,13 @@ abstract class dbFacile {
 	protected $fieldNames;
 	protected $schemaNameField;
 	protected $schemaTypeField;
-	
+
+	public $cacheQueries = true; // caches query results in memory by query string
 	protected $cache = array();
+	
+	// new, more robust caching
+	protected $previousSql; // cache of previous query
+	protected $previousResult; // cache of previous result set
 	
 	public $schema = array(); // this will probably become protected
 	//public static $schemaCache; // filename to use when saving/reading full database schema cache
@@ -85,19 +90,19 @@ abstract class dbFacile {
 	 * Performs a query using the given string.
 	 * Used by the other _query functions.
 	 * */
-	public function execute($sql, $parameters = array()) {
+	public function execute($sql, $parameters = array(), $cache = true) {
 		$this->query = $sql;
 		$this->parameters = $parameters;
 
 		$fullSql = $this->makeQuery($sql, $parameters);
-		/*
-		if(array_key_exists($fullSql, $this->cache)) {
+
+		if($cache && array_key_exists($fullSql, $this->cache)) {
 			$this->result = $this->cache[ $fullSql ];
 			$this->_rewind($this->result);
+			trigger_error('dbFacile - Used cached result (' . $fullSql . ')', E_USER_NOTICE);
 			
 			return ($this->result !== false);
 		}
-		*/
 
 		if($this->logFile)
 			fwrite($this->logFile, date('Y-m-d H:i:s') . "\n" . $sql . "\n" . print_r($parameters, true) . "\n\n");
@@ -146,7 +151,7 @@ abstract class dbFacile {
 		$sql = 'insert into ' . $table . ' (' . implode(',', array_keys($data)) . ') values(' . implode(',', $this->placeHolders($data)) . ')';
 
 		$this->beginTransaction();	
-		if($this->execute($sql, $data)) {
+		if($this->execute($sql, $data, false)) { // execute, ignore (don't use) cache
 			$id = $this->_lastID($table);
 			$this->commitTransaction();
 			return $id;
@@ -189,7 +194,7 @@ abstract class dbFacile {
 			$data = array_merge($data, $parameters);
 		}
 
-		$this->execute($sql, $data);
+		$this->execute($sql, $data, false); // execute, ignore (don't use) cache
 		return $this->_affectedRows();
 	}
 
@@ -198,7 +203,7 @@ abstract class dbFacile {
 		if($where) {
 			$sql .= ' where ' . $where;
 		}
-		$this->execute($sql, $parameters);
+		$this->execute($sql, $parameters, false); // execute, ignore (don't use) cache
 		return $this->_affectedRows();
 	}
 
