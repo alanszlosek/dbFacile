@@ -17,27 +17,27 @@ if($create) {
 	exit;
 }
 
-echo 'fetch<br />';
+echo 'fetch (select * from test)<br />';
 $rows = $db->fetchAll('select * from test');
 var_dump($rows);
 
-echo '<br /><br />fetch with ?<br />';
+echo '<br /><br />fetch with ? (select * from test where b > 1)<br />';
 $rows = $db->fetchAll('select * from test where b > ?', array('1'));
 var_dump($rows);
 
-echo '<br /><br />fetchRow<br />';
+echo '<br /><br />fetchRow (select * from test where be = 1)<br />';
 $row = $db->fetchRow('select * from test where b = ?', array('1'));
 var_dump($row);
 
-echo '<br /><br />fetchCell<br />';
+echo '<br /><br />fetchCell (select * from test where b = 1)<br />';
 $row = $db->fetchCell('select * from test where b = ?', array('1'));
 var_dump($row);
 
-echo '<br /><br />fetchColumn<br />';
+echo '<br /><br />fetchColumn (select * from test where b > 1)<br />';
 $row = $db->fetchColumn('select * from test where b > ?', array('1'));
 var_dump($row);
 
-echo '<br /><br />fetchKeyValue<br />';
+echo '<br /><br />fetchKeyValue (select * from test where b > 1)<br />';
 $row = $db->fetchKeyValue('select * from test where b > ?', array('1'));
 var_dump($row);
 
@@ -60,4 +60,5 @@ $db->delete('test', 'c=?', array('new'));
 echo '<br /><br />after delete<br />';
 $row = $db->fetchRow('select * from test where c = ?', array('new'));
 var_dump($row);
+
 ?>

@@ -1,3 +1,13 @@
+2008-05-01
+
+The problem with caching queries at the dbFacile level is this:
+
+1. select all rows in the table
+2. insert into the table
+3. select all rows in the same table and you'll get the same as #1, neglecting the insert
+
+Maybe you should only cache the previous query? And only if it's not an insert, update or delete? That'll probably fix it.
+
 2008-04-16
 
 Need to solidify when dbFacile loads the schema. ORMer references this schema right away at each instantiation of an orm object...

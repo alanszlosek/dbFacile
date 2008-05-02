@@ -16,10 +16,10 @@ abstract class dbFacile {
 	protected $schemaTypeField;
 
 	public $cacheQueries = true; // caches query results in memory by query string
-	protected $cache = array();
+	//protected $cache = array();
 	
 	// new, more robust caching
-	protected $previousSql; // cache of previous query
+	protected $previousQuery; // cache of previous query
 	protected $previousResult; // cache of previous result set
 	
 	public $schema = array(); // this will probably become protected
@@ -96,26 +96,37 @@ abstract class dbFacile {
 
 		$fullSql = $this->makeQuery($sql, $parameters);
 
-		if($cache && array_key_exists($fullSql, $this->cache)) {
-			$this->result = $this->cache[ $fullSql ];
+		if($cache && $this->previousQuery == $fullSql) {
+			$this->result = $this->previousResult;
 			$this->_rewind($this->result);
 			trigger_error('dbFacile - Used cached result (' . $fullSql . ')', E_USER_NOTICE);
 			
+			if($this->logFile)
+				fwrite($this->logFile, date('Y-m-d H:i:s') . "\n(cached) " . $sql . "\n" . print_r($parameters, true) . "\n\n");
+			
 			return ($this->result !== false);
+		} else {
+			$this->previousQuery = $this->previousResult = null;
 		}
 
 		if($this->logFile)
 			fwrite($this->logFile, date('Y-m-d H:i:s') . "\n" . $sql . "\n" . print_r($parameters, true) . "\n\n");
 
 		$this->result = $this->_query($fullSql); // sets $this->result
-		$this->cache[ $fullSql ] = $this->result;
+		//$this->cache[ $fullSql ] = $this->result;
 		if(!$this->result && (error_reporting() & 1))
 			die('dbFacile - Error in query: ' . $this->query . ' : ' . $this->_error());
 
-		if($this->result)
+		if($this->result) {
+			if($cache) {
+				$this->previousQuery = $fullSql;
+				$this->previousResult = $this->result;
+			}
 			return true;
-		else
+		} else {
+			$this->previousQuery = $this->previousResult = null;
 			return false;
+		}
 	}
 	
 	/*
@@ -213,7 +224,7 @@ abstract class dbFacile {
 	 * */
 	public function fetchAll($sql, $parameters = array()) {
 		//$sql = $this->transformPlaceholders(func_get_args());
-		$this->execute($sql, $parameters);
+		$this->execute($sql, $parameters, $this->cacheQueries);
 		if($this->_numberRows()) {
 			return $this->_fetchAll();
 		}
@@ -226,7 +237,7 @@ abstract class dbFacile {
 	 * It is intended to return an iterator, and act upon buffered data.
 	 * */
 	public function fetch($sql, $parameters = array()) {
-		$this->execute($sql, $parameters);
+		$this->execute($sql, $parameters, $this->cacheQueries);
 		return $this->_fetch();
 	}
 
@@ -236,7 +247,7 @@ abstract class dbFacile {
 	 * */
 	public function fetchRow($sql = null, $parameters = array()) {
 		if($sql != null)
-			$this->execute($sql, $parameters);
+			$this->execute($sql, $parameters, $this->cacheQueries);
 		if($this->result)
 			return $this->_fetchRow();
 		return null;
@@ -246,7 +257,7 @@ abstract class dbFacile {
 	 * Fetches the first call from the first row returned by the query
 	 * */
 	public function fetchCell($sql, $parameters = array()) {
-		if($this->execute($sql, $parameters)) {
+		if($this->execute($sql, $parameters, $this->cacheQueries)) {
 			return array_shift($this->_fetchRow()); // shift first field off first row
 		}
 		return null;
@@ -257,7 +268,7 @@ abstract class dbFacile {
 	 * It fetches one cell from each row and places all the values in 1 array
 	 * */
 	public function fetchColumn($sql, $parameters = array()) {
-		if($this->execute($sql, $parameters)) {
+		if($this->execute($sql, $parameters, $this->cacheQueries)) {
 			$cells = array();
 			foreach($this->_fetchAll() as $row) {
 				$cells[] = array_shift($row);
@@ -274,7 +285,7 @@ abstract class dbFacile {
 	 * The second the key's value
 	 */
 	public function fetchKeyValue($sql, $parameters = array()) {
-		if($this->execute($sql, $parameters)) {
+		if($this->execute($sql, $parameters, $this->cacheQueries)) {
 			$data = array();
 			foreach($this->_fetchAll() as $row) {
 				$key = array_shift($row);
@@ -568,7 +579,7 @@ class dbFacile_mssql extends dbFacile {
 		while($row = mssql_fetch_assoc($this->result)) {
 			$data[] = $row;
 		}
-		mssql_free_result($this->result);
+		//mssql_free_result($this->result);
 		// rewind?
 		return $data;
 	}
@@ -579,7 +590,7 @@ class dbFacile_mssql extends dbFacile {
 		return $this->fetchCell('select scope_identity()');
 	}
 	protected function _fields($table) {
-		$this->execute('select COLUMN_NAME,DATA_TYPE from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME=?', array($table));
+		$this->execute('select COLUMN_NAME,DATA_TYPE from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME=?', array($table), false);
 		return $this->_fetchAll();
 	}
 	protected function _foreignKeys($table) {
@@ -634,7 +645,7 @@ class dbFacile_mysql extends dbFacile {
 		while($row = mysql_fetch_assoc($this->result)) {
 			$data[] = $row;
 		}
-		mysql_free_result($this->result);
+		//mysql_free_result($this->result);
 		// rewind?
 		return $data;
 	}
@@ -646,7 +657,7 @@ class dbFacile_mysql extends dbFacile {
 	}
 	protected function _fields($table) {
 		$fields = array();
-		$this->execute('describe ' . $table);
+		$this->execute('describe ' . $table, array(), false);
 		foreach($this->_fetchAll() as $row) {
 			$type = strtolower(preg_replace('/\(.*\)/', '', $row['Type'])); // remove size specifier
 			$name = $row['Field'];
@@ -880,14 +891,14 @@ class dbFacile_sqlite extends dbFacile {
 	}
 	protected function _foreignKeys($table) {
 		$keys = array();
-		$this->execute('pragma foreign_key_list(' . $table . ')');
+		$this->execute('pragma foreign_key_list(' . $table . ')', array(), false);
 		foreach($this->_fetchAll() as $row) {
 			$keys[ $row['from'] ] = array('table' => $row['table'], 'field' => $row['to']);
 		}
 		return $keys;
 	}
 	protected function _tables() {
-		if(!$this->execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"))
+		if(!$this->execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name", array(), false))
 			die('Failed to get tables');
 		return $this->_fetchAll();
 	}
