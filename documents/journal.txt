@@ -1,3 +1,7 @@
+2008-05-02
+
+Since PDO doesn't really return the number of affected rows for update and probably delete queries. What should I do? If the query fails, does it at least return false, and some non-false value to indicate the query string itself is valid?
+
 2008-05-01
 
 The problem with caching queries at the dbFacile level is this:

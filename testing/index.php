@@ -25,6 +25,11 @@ echo '<br /><br />fetch with ? (select * from test where b > 1)<br />';
 $rows = $db->fetchAll('select * from test where b > ?', array('1'));
 var_dump($rows);
 
+// tests name parameter substring squashing
+echo '<br /><br />fetch with name params (select * from test where b = 1 or b = 2)<br />';
+$rows = $db->fetchAll('select * from test where b = :aa or b = :aab', array('aa' => '1', 'aab' => 2));
+var_dump($rows);
+
 echo '<br /><br />fetchRow (select * from test where be = 1)<br />';
 $row = $db->fetchRow('select * from test where b = ?', array('1'));
 var_dump($row);

@@ -16,6 +16,7 @@ abstract class dbFacile {
 	protected $schemaTypeField;
 
 	public $cacheQueries = true; // caches query results in memory by query string
+	public $cacheRepeatQueries = true; // caches query results in memory by query string
 	//protected $cache = array();
 	
 	// new, more robust caching
@@ -345,6 +346,9 @@ abstract class dbFacile {
 		var_dump($query);
 		var_dump($newParams);exit;
 		*/
+
+		// sort newParams in reverse to stop substring squashing
+		krsort($newParams);
 		$query = str_replace( array_keys($newParams), $newParams, $query);
 		//die($query);
 		return $query;

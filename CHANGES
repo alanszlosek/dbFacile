@@ -1,8 +1,11 @@
 dbFacile - The easily used PHP Database Abstraction Class
-Copyright (C) 2007 Alan Szlosek
+Copyright (C) 2007-2008 Alan Szlosek
 
 ----
 
+Version 0.4
+
+- stop substring squashing with named parameters
 - fixed fetchKeyValue bug ($data[ $key ] = array_shift($row); on line 227)
 
 Version 0.3

@@ -1,5 +1,9 @@
 not necessarily in any order, unfortunately ...
-	
+
+- ensure dbFacile doesn't expect/require a numeric primary key field
+- invalidField() throws notice
+- lazy loading
+	- user::orders()->with('orderProduct');
 - cache queries
 	- flag for turning on/off
 	- execute(), if it receives the same exact query string as it has before, will return the same result set
