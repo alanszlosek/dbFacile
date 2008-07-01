@@ -15,8 +15,9 @@ abstract class dbFacile {
 	protected $schemaNameField;
 	protected $schemaTypeField;
 
-	public $cacheQueries = true; // caches query results in memory by query string
-	public $cacheRepeatQueries = true; // caches query results in memory by query string
+	// these flags are not yet implemented (20080630)
+	//public $cacheQueries = false; // caches query results in memory by query string
+	//public $cacheRepeatQueries = false; // caches query results in memory by query string
 	//protected $cache = array();
 	
 	// new, more robust caching
