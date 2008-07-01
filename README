@@ -19,7 +19,7 @@ II. Usage
 
 	A. Instantiation
 
-		$db = dbFacile::open(TYPE, USERNAME, PASSWORD, DATABASE_NAME, HOSTNAME);
+		$db = dbFacile::open(TYPE, DATABASE_NAME, USERNAME, PASSWORD, HOSTNAME);
 		
 		Valid TYPEs are: mssql, mysql, sqlite.
 		In the future we'll also have: postgresql, pdo_mssql, pdo_mysql, pdo_postgresql, pdo_sqlite, pdo_sqlite2.
