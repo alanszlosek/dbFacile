@@ -7,6 +7,7 @@ Version 0.4
 
 - stop substring squashing with named parameters
 - fixed fetchKeyValue bug ($data[ $key ] = array_shift($row); on line 227)
+- restructure flow between fetch*() methods and execute() to handle query placeholders
 
 Version 0.3
 

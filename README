@@ -19,17 +19,16 @@ II. Usage
 
 	A. Instantiation
 
-		$db = new dbFacile_TYPE();
-		$db->open(USERNAME, PASSWORD, DATABASE_NAME, HOSTNAME);
+		$db = dbFacile::open(TYPE, USERNAME, PASSWORD, DATABASE_NAME, HOSTNAME);
 		
-		Valid TYPEs are: mssql, mysql, postgresql, sqlite.
-		In the future we'll also have: pdo_mssql, pdo_mysql, pdo_postgresql, pdo_sqlite, pdo_sqlite2.
+		Valid TYPEs are: mssql, mysql, sqlite.
+		In the future we'll also have: postgresql, pdo_mssql, pdo_mysql, pdo_postgresql, pdo_sqlite, pdo_sqlite2.
 		
 		When using SQLite, the open method only needs the file path to the database file.
 		
 		If you've already established a Database connection and still want to make use of dbFacile, you're in luck. Simple pass a handle to the current connection into the constructor.
 		For mysql, you can also do the following because an empty call to mysql_connect() returns the current connection resource.
-			$db = new dbFacile_mysql(mysql_connect());
+			$db = dbFacile::open('mysql', mysql_connect());
 
 		You can also enable query logging by calling $db->logToFile(FILENAME).
 
@@ -43,7 +42,7 @@ II. Usage
 		
 		$row = $db->fetchRow('select * from users') : Performs SQL query and returns one-dimensional associative array of fields and values.
 		
-		$email = $db->fetchCell('select email from users where name=?', 'Alan') : Replaces ? found in query with a quoted and escaped version of the second paramter, performs SQL query and returns first field from first row in result.
+		$email = $db->fetchCell('select email from users where name=?', array('Alan')) : Replaces ? found in query with a quoted and escaped version of the second paramter, performs SQL query and returns first field from first row in result.
 		
 		$emailAddresses = $db->fetchColumn('select email from users') : Performs SQL and returns the first column as a 1-dimensional array.
 
@@ -64,9 +63,9 @@ II. Usage
 		The above MySql example will update the name field of each user record with a concatenation of the first_name and last_name fields. Note the reference to concat(), a MySql function.
 		
 		The update() method can also take additional parameters that act as a where clause. Here are some examples:
-			$db->update( array('name=' => 'John'), 'users', 'id=3');
-			$db->update( array('name=' => 'John'), 'users', 'id=? and email=?', 3, 'a@g.com');
-			$db->update( array('name=' => 'John'), 'users', array('id=? and email=?', 3, 'a@g.com'));
+			$db->update( array('name=' => 'John'), 'users', array('id=3'));
+			$db->update( array('name=' => 'John'), 'users', 'id=? and email=?', array(3, 'a@g.com'));
+			$db->update( array('name=' => 'John'), 'users', array('id=? and email=?', array(3, 'a@g.com')));
 
 	D. Transactions
 	
