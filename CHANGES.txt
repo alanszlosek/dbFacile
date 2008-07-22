@@ -3,6 +3,10 @@ Copyright (C) 2007-2008 Alan Szlosek
 
 ----
 
+Version 0.4.1
+
+- Logging includes full query and execution time
+
 Version 0.4
 
 - stop substring squashing with named parameters

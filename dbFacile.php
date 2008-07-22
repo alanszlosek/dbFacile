@@ -1,7 +1,7 @@
 <?php
 /*
 dbFacile - A Database API that should have existed from the start
-Version 0.3
+Version 0.4
 See LICENSE for license details.
 */
 
@@ -112,12 +112,17 @@ abstract class dbFacile {
 		}
 
 		if($this->logFile)
-			fwrite($this->logFile, date('Y-m-d H:i:s') . "\n" . $sql . "\n" . print_r($parameters, true) . "\n\n");
+			$time_start = microtime(true);
 
 		$this->result = $this->_query($fullSql); // sets $this->result
-		//$this->cache[ $fullSql ] = $this->result;
+		
+		if($this->logFile) {
+			$time_end = microtime(true);
+			fwrite($this->logFile, date('Y-m-d H:i:s') . "\n" . $fullSql . "\n" . number_format($time_end - $time_start, 8) . " seconds\n\n");
+		}
+
 		if(!$this->result && (error_reporting() & 1))
-			die('dbFacile - Error in query: ' . $this->query . ' : ' . $this->_error());
+			trigger_error(E_USER_WARNING, 'dbFacile - Error in query: ' . $this->query . ' : ' . $this->_error());
 
 		if($this->result) {
 			if($cache) {
