@@ -33,6 +33,26 @@ abstract class dbFacile {
 	protected $foreignKeys; // array('TABLE'=>array('FIELD'=>'TO_TABLE.FIELD'))
 	protected $reverseForeignKeys; // a data structure that holds the reverse of normal foreign key mappings
 
+	// implement these methods when creating driver subclasses
+	// need to add _open() to the mix somehow
+	public abstract function beginTransaction();
+	public abstract function commitTransaction();
+	public abstract function rollbackTransaction();
+	public abstract function close();
+	protected abstract function _affectedRows();
+	protected abstract function _error();
+	protected abstract function _escapeString($string);
+	protected abstract function _fetch();
+	protected abstract function _fetchAll();
+	protected abstract function _fetchRow();
+	protected abstract function _fields($table);
+	protected abstract function _foreignKeys($table);
+	protected abstract function _lastID();
+	protected abstract function _numberRows();
+	protected abstract function _query($sql);
+	protected abstract function _rewind($result);
+	protected abstract function _tables();
+
 	public function __construct($handle = null) {
 		$this->connection = $handle;
 		$this->query = $this->result = null;
@@ -309,15 +329,6 @@ abstract class dbFacile {
 			return array();
 	}
 
-	public function beginTransaction() {
-	}
-
-	public function commitTransaction() {
-	}
-
-	public function rollbackTransaction() {
-	}
-	
 	/*
 	 * Return query and other debugging data if error_reporting to right settings
 	 * */
@@ -554,36 +565,41 @@ abstract class dbFacile {
  * */
 
 class dbFacile_mssql extends dbFacile {
-	protected function _open($database, $user, $password, $host) {
-		$this->connection = mssql_connect($host, $user, $password);
-		if($this->connection)
-			mssql_select_db($database, $this->connection);
-		//$this->buildSchema();
-		return $this->connection;
+	public function beginTransaction() {
+		//mssql_query('begin', $this->connection);
 	}
-	protected function _query($sql, $parameters) {
-		$sql = $this->makeQuery($sql, $parameters);
-		return mssql_query($sql, $this->connection);
+
+	public function commitTransaction() {
+		//mssql_query('commit', $this->connection);
 	}
+
+	public function close() {
+		mssql_close($this->connection);
+	}
+
+	public function rollbackTransaction() {
+		//mssql_query('rollback', $this->connection);
+	}
+
+	protected function _affectedRows() {
+		return mssql_rows_affected($this->connection);
+	}
+
+	protected function _error() {
+		return mssql_get_last_message();
+	}
+
 	protected function _escapeString($string) {
 		$s = stripslashes($string);
 		$s = str_replace( array("'", "\0"), array("''", '[NULL]'), $s);
 		return $s;
 	}
-	protected function _error() {
-		return mssql_get_last_message();
-	}
-	protected function _affectedRows() {
-		return mssql_rows_affected($this->connection);
-	}
-	protected function _numberRows() {
-		return mssql_num_rows($this->result);
-	}
-	
+
 	protected function _fetch() {
 		// use mysql_data_seek to get to row index
 		return $this->_fetchAll();
 	}
+
 	protected function _fetchAll() {
 		$data = array();
 		while($row = mssql_fetch_assoc($this->result)) {
@@ -593,63 +609,85 @@ class dbFacile_mssql extends dbFacile {
 		// rewind?
 		return $data;
 	}
+
 	protected function _fetchRow() {
 		return mssql_fetch_assoc($this->result);
 	}
-	protected function _lastID() {
-		return $this->fetchCell('select scope_identity()');
-	}
+
 	protected function _fields($table) {
 		$this->execute('select COLUMN_NAME,DATA_TYPE from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME=?', array($table), false);
 		return $this->_fetchAll();
 	}
+
 	protected function _foreignKeys($table) {
 	}
+
+	protected function _lastID() {
+		return $this->fetchCell('select scope_identity()');
+	}
+
+	protected function _open($database, $user, $password, $host) {
+		$this->connection = mssql_connect($host, $user, $password);
+		if($this->connection)
+			mssql_select_db($database, $this->connection);
+		//$this->buildSchema();
+		return $this->connection;
+	}
+
+	protected function _numberRows() {
+		return mssql_num_rows($this->result);
+	}
+
 	protected function _primaryKey($table) {
 	}
-	public function beginTransaction() {
-		//mssql_query('begin', $this->connection);
+
+	protected function _query($sql) {
+		return mssql_query($sql, $this->connection);
 	}
-	public function commitTransaction() {
-		//mssql_query('commit', $this->connection);
+
+	protected function _rewind($result) {
 	}
-	public function rollbackTransaction() {
-		//mssql_query('rollback', $this->connection);
-	}
-	public function close() {
-		mssql_close($this->connection);
+	
+	protected function _tables() {
 	}
 } // mssql
 
 class dbFacile_mysql extends dbFacile {
-	// user, password, database, host
-	protected function _open($database, $user, $password, $host) {
-		$this->connection = mysql_connect($host, $user, $password);
-		if($this->connection)
-			mysql_select_db($database, $this->connection);
-		//$this->buildSchema();
-		return $this->connection;
+	private $database;
+
+	public function beginTransaction() {
+		mysql_query('begin', $this->connection);
 	}
-	protected function _query($sql) {
-		return mysql_query($sql, $this->connection);
+
+	public function close() {
+		mysql_close($this->connection);
 	}
-	protected function _escapeString($string) {
-		return mysql_real_escape_string($string);
+
+	public function commitTransaction() {
+		mysql_query('commit', $this->connection);
 	}
-	protected function _error() {
-		return mysql_error($this->connection);
+
+	public function rollbackTransaction() {
+		mysql_query('rollback', $this->connection);
 	}
+
 	protected function _affectedRows() {
 		return mysql_affected_rows($this->connection);
 	}
-	protected function _numberRows() {
-		return mysql_num_rows($this->result);
+
+	protected function _error() {
+		return mysql_error($this->connection);
 	}
-	
+
+	protected function _escapeString($string) {
+		return mysql_real_escape_string($string);
+	}
+
 	protected function _fetch() {
 		// use mysql_data_seek to get to row index
 		return $this->_fetchAll();
 	}
+
 	protected function _fetchAll() {
 		$data = array();
 		while($row = mysql_fetch_assoc($this->result)) {
@@ -659,12 +697,11 @@ class dbFacile_mysql extends dbFacile {
 		// rewind?
 		return $data;
 	}
+
 	protected function _fetchRow() {
 		return mysql_fetch_assoc($this->result);
 	}
-	protected function _lastID() {
-		return mysql_insert_id($this->connection);
-	}
+
 	protected function _fields($table) {
 		$fields = array();
 		$this->execute('describe ' . $table, array(), false);
@@ -675,6 +712,7 @@ class dbFacile_mysql extends dbFacile {
 		}
 		return $fields;
 	}
+
 	protected function _foreignKeys($table) {
 		$version = mysql_get_server_info($this->connection);
 		$parts = explode('-', $version); // strip off non-numeric portion
@@ -688,17 +726,37 @@ class dbFacile_mysql extends dbFacile {
 			return array();
 		}
 	}
-	public function beginTransaction() {
-		mysql_query('begin', $this->connection);
+
+	protected function _lastID() {
+		return mysql_insert_id($this->connection);
 	}
-	public function commitTransaction() {
-		mysql_query('commit', $this->connection);
+
+	protected function _numberRows() {
+		return mysql_num_rows($this->result);
 	}
-	public function rollbackTransaction() {
-		mysql_query('rollback', $this->connection);
+	
+	// user, password, database, host
+	protected function _open($database, $user, $password, $host) {
+		$this->database = $database;
+		$this->connection = mysql_connect($host, $user, $password);
+		if($this->connection)
+			mysql_select_db($database, $this->connection);
+		//$this->buildSchema();
+		return $this->connection;
 	}
-	public function close() {
-		mysql_close($this->connection);
+
+	protected function _query($sql) {
+		return mysql_query($sql, $this->connection);
+	}
+
+	protected function _rewind($result) {
+	}
+
+	protected function _tables() {
+		// this should probably use 'show tables' if the mysql version is older and doesn't support the information_schema
+		if(!$this->execute("select TABLE_NAME from information_schema.TABLES where TABLE_SCHEMA=? order by TABLE_NAME", array($this->database), false))
+			die('Failed to get tables');
+		return $this->_fetchAll();
 	}
 } // mysql
 
@@ -844,52 +902,51 @@ class dbFacile_postgresql extends dbFacile {
 */
 
 class dbFacile_sqlite extends dbFacile {
-	protected function _open($database) {
-		$this->connection = sqlite_open($database);
-		//$this->buildSchema();
-		return $this->connection;
+	public function beginTransaction() {
+		sqlite_query($this->connection, 'begin transaction');
 	}
-	protected function _query($sql) {
-		//var_dump($parameters);exit;
-		/*
-		$sql = $this->makeQuery($sql, $parameters);
-		if(array_key_exists($sql, $this->cache))
-			return $this->cache[ $sql ];
-		*/
-		return sqlite_query($this->connection, $sql);
+
+	public function close() {
+		sqlite_close($this->connection);
 	}
-	protected function _escapeString($string) {
-		return sqlite_escape_string($string);
+
+	public function commitTransaction() {
+		sqlite_query($this->connection, 'commit transaction');
 	}
-	protected function _error() {
-		return sqlite_error_string(sqlite_last_error($this->connection));
+
+	public function rollbackTransaction() {
+		sqlite_query($this->connection, 'rollback transaction');
 	}
+
 	protected function _affectedRows() {
 		return sqlite_changes($this->connection);
 	}
-	protected function _numberRows() {
-		return sqlite_num_rows($this->result);
+
+	protected function _error() {
+		return sqlite_error_string(sqlite_last_error($this->connection));
 	}
-	protected function _rewind($result) {
-		sqlite_rewind($result);
+
+	protected function _escapeString($string) {
+		return sqlite_escape_string($string);
 	}
+
 	protected function _fetch() {
 		return new dbFacile_sqlite_result($this->result);
 	}
+
 	protected function _fetchAll() {
 		$rows = sqlite_fetch_all($this->result, SQLITE_ASSOC);
 		// free result?
 		// rewind?
 		return $rows;
 	}
+
 	// when passed result
 	// returns next row
 	protected function _fetchRow() {
 		return sqlite_fetch_array($this->result, SQLITE_ASSOC);
 	}
-	protected function _lastID() {
-		return sqlite_last_insert_rowid($this->connection);
-	}
+
 	protected function _fields($table) {
 		$fields = array();
 		foreach($this->fetchAll('pragma table_info(' . $table. ')') as $row) {
@@ -899,6 +956,7 @@ class dbFacile_sqlite extends dbFacile {
 		}
 		return $fields;
 	}
+
 	protected function _foreignKeys($table) {
 		$keys = array();
 		$this->execute('pragma foreign_key_list(' . $table . ')', array(), false);
@@ -907,22 +965,39 @@ class dbFacile_sqlite extends dbFacile {
 		}
 		return $keys;
 	}
+
+	protected function _lastID() {
+		return sqlite_last_insert_rowid($this->connection);
+	}
+
+	protected function _numberRows() {
+		return sqlite_num_rows($this->result);
+	}
+
+	protected function _open($database) {
+		$this->connection = sqlite_open($database);
+		//$this->buildSchema();
+		return $this->connection;
+	}
+
+	protected function _query($sql) {
+		//var_dump($parameters);exit;
+		/*
+		$sql = $this->makeQuery($sql, $parameters);
+		if(array_key_exists($sql, $this->cache))
+			return $this->cache[ $sql ];
+		*/
+		return sqlite_query($this->connection, $sql);
+	}
+
+	protected function _rewind($result) {
+		sqlite_rewind($result);
+	}
+
 	protected function _tables() {
 		if(!$this->execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name", array(), false))
 			die('Failed to get tables');
 		return $this->_fetchAll();
-	}
-	public function beginTransaction() {
-		sqlite_query($this->connection, 'begin transaction');
-	}
-	public function commitTransaction() {
-		sqlite_query($this->connection, 'commit transaction');
-	}
-	public function rollbackTransaction() {
-		sqlite_query($this->connection, 'rollback transaction');
-	}
-	public function close() {
-		sqlite_close($this->connection);
 	}
 } // sqlite
 

@@ -6,6 +6,7 @@ $db = dbFacile::open('sqlite', '/home/switchprog/hg/dbFacile/testing/testing.db'
 $db->logToFile('db.log');
 $db->buildSchema();
 
+//$create = true;
 $create = false;
 
 if($create) {
@@ -14,6 +15,8 @@ if($create) {
 	echo $db->insert(array('c' => 'aaa'), 'test') . '<br />';
 	echo $db->insert(array('c' => 'bbb'), 'test') . '<br />';
 	echo $db->insert(array('c' => 'ccc'), 'test') . '<br />';
+	// begin support for multi-field primary keys
+	echo $db->insert(array('id' => '1', 'name' => 'Hello'), 'test2') . '<br />';
 	exit;
 }
 
