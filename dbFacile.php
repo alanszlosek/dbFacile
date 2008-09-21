@@ -1,7 +1,7 @@
 <?php
 /*
 dbFacile - A Database API that should have existed from the start
-Version 0.4
+Version 0.4.1
 See LICENSE for license details.
 */
 
@@ -74,6 +74,25 @@ abstract class dbFacile {
 		if($this->logFile)
 			fclose($this->logFile);
 	}
+	
+	// Implement these methods in subclasses:
+	public abstract function beginTransaction();
+	public abstract function commitTransaction();
+	public abstract function rollbackTransaction();
+	public abstract function close();
+	
+	protected abstract function _affectedRows();
+	protected abstract function _error();
+	protected abstract function _escapeString($string);
+	protected abstract function _fetch();
+	protected abstract function _fetchAll();
+	protected abstract function _fetchRow();
+	protected abstract function _fields($table);
+	protected abstract function _foreignKeys($table);
+	protected abstract function _lastID();
+	protected abstract function _numberRows();
+	protected abstract function _query($sql);
+	protected abstract function _tables();
 
 	public static function open($type, $database, $user = '', $password = '', $host = 'localhost') {
 		// try to use PDO if available
