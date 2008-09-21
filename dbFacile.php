@@ -75,25 +75,6 @@ abstract class dbFacile {
 			fclose($this->logFile);
 	}
 	
-	// Implement these methods in subclasses:
-	public abstract function beginTransaction();
-	public abstract function commitTransaction();
-	public abstract function rollbackTransaction();
-	public abstract function close();
-	
-	protected abstract function _affectedRows();
-	protected abstract function _error();
-	protected abstract function _escapeString($string);
-	protected abstract function _fetch();
-	protected abstract function _fetchAll();
-	protected abstract function _fetchRow();
-	protected abstract function _fields($table);
-	protected abstract function _foreignKeys($table);
-	protected abstract function _lastID();
-	protected abstract function _numberRows();
-	protected abstract function _query($sql);
-	protected abstract function _tables();
-
 	public static function open($type, $database, $user = '', $password = '', $host = 'localhost') {
 		// try to use PDO if available
 		switch($type) {
@@ -123,7 +104,7 @@ abstract class dbFacile {
 		}
 	}
 
-	public function logToFile($file, $method = 'a+') {
+	public function logToFile($file, $method = 'a+', $start = "Log opened\n\n", $end = "Log closed\n\n") {
 		$this->logFile = fopen($file, $method);
 	}
 
@@ -219,7 +200,7 @@ abstract class dbFacile {
 	}
 
 	/*
-	 * Passed an array, table name, and a where clause, it attempts to update a record.
+	 * Passed an array, table name, where clause, and placeholder parameters, it attempts to update a record.
 	 * Returns the number of affected rows
 	 * */
 	public function update($data, $table, $where = null, $parameters = array()) {
