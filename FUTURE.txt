@@ -10,7 +10,6 @@ FUTURE ITEMS AND IDEAS
 - table prefix to prepend to all tables (except for hand-typed queries)? might be too much work
 - getTables()
 - error out if don't have dbHandle
-- add static method to base class for instantiating driver classes. allows for more streamlined integration into ecommerce: call to base class should trigger __autoload which can load the file called dbFacile.php rather than trying to load dbFacile_mysql.php
 - check for valid tables passed to insert(), update(), delete()
 
 - return generated primary key on insert for mssql

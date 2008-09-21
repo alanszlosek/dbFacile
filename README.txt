@@ -1,5 +1,5 @@
 dbFacile - The easily used PHP Database Abstraction Class
-Version 0.4
+Version 0.4.1
 Copyright (C) 2007-2008 Alan Szlosek
 
 ----
