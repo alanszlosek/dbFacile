@@ -3,10 +3,18 @@ Copyright (C) 2007-2008 Alan Szlosek
 
 ----
 
-Version 0.4.1
+Version 0.5
+
+- Don't check for invalid fields by default. Removes need to build schema (faster operation).
+- Flag for turning invalidFieldCheck on/off
+- New method for specifying that a value should not be escaped (when passing data to insert/update, encapsulate the value in an array)
+- Jump out of makeQuery ASAP
+
+Version 0.4.2
 
 - Logging includes full query and execution time
 - Fix broken MySQL driver: __tables() method
+- Typos from 0.4.1
 
 Version 0.4
 

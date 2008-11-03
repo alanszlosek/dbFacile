@@ -16,8 +16,10 @@ abstract class dbFacile {
 	protected $schemaTypeField;
 
 	// these flags are not yet implemented (20080630)
+	// these flags may not ever be implemented. caching shouldn't occur at this level. (20080924)
 	public $cacheQueries = false; // caches query results in memory by query string
 	public $cacheRepeatQueries = false; // caches query results in memory by query string
+	public $filterInvalidFields = false;
 	//protected $cache = array();
 	
 	// new, more robust caching
@@ -68,6 +70,7 @@ abstract class dbFacile {
 		$this->schema = null;
 
 		dbFacile::$instance = $this;
+		// construct new dbFacile::$instances element using host and database name?
 	}
 
 	public function __destruct() {
@@ -142,7 +145,7 @@ abstract class dbFacile {
 		}
 
 		if(!$this->result && (error_reporting() & 1))
-			trigger_error(E_USER_WARNING, 'dbFacile - Error in query: ' . $this->query . ' : ' . $this->_error());
+			trigger_error('dbFacile - Error in query: ' . $this->query . ' : ' . $this->_error(), E_USER_WARNING);
 
 		if($this->result) {
 			if($cache) {
@@ -180,7 +183,8 @@ abstract class dbFacile {
 		}
 		// appropriately quote input data
 		// remove invalid fields
-		$data = $this->filterFields($data, $table);
+		if($this->filterInvalidFields)
+			$data = $this->filterFields($data, $table);
 
 		// wrap quotes around values that need them
 		// actually, shouldn't quote data yet, since PDO does it for us
@@ -214,8 +218,8 @@ abstract class dbFacile {
 			$table = $tmp;
 			trigger_error('dbFacile - The first two parameters passed to update() were in reverse order, but it has been allowed', E_USER_NOTICE);
 		}
-		// filter invalid fields
-		$data = $this->filterFields($data, $table);
+		if($this->filterInvalidFields)
+			$data = $this->filterFields($data, $table);
 		// wrap quotes around values that need them
 		//$data = $this->quoteData($data);
 
@@ -343,6 +347,9 @@ abstract class dbFacile {
 	 * PDO drivers don't need to use this
 	 */
 	protected function makeQuery($sql, $parameters) {
+		// bypass extra logic if we have no parameters
+		if(sizeof($parameters) == 0)
+			return $sql;
 		$parts = explode('?', $sql);
 		$query = array_shift($parts); // put on first part
 	
@@ -393,10 +400,21 @@ abstract class dbFacile {
 		foreach($data as $key=>$value) {
 			$escape = true;
 			// don't quote or esc
+			/*
 			if(substr($key,-1) == '=') {
 				$escape = false;
 				$key = substr($key, 0, strlen($key)-1);
 			}
+			*/
+			// new way to determine whether to quote and escape
+			// if value is an array, we treat it as a "decorator" that tells us not to escape the
+			// value contained in the array
+			if(is_array($value) && !is_object($value)) {
+				$escape = false;
+				$value = array_shift($value);
+			}
+			// it's not right to worry about invalid fields in this method because we may be operating on fields
+			// that are aliases, or part of other tables through joins 
 			//if(!in_array($key, $columns)) // skip invalid fields
 			//	continue;
 			if($escape)

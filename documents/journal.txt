@@ -1,3 +1,13 @@
+2008-09-24
+
+I think I've decided to disable invalid field checking by default. It used to be that you could pass invalid fields in the data array to insert/update and they'd only use the fields that are present in the table to construct the insert/update query. While this is nice and convenient, it enables sloppy programming, which I'm not particularly happy with. But I should probably get the concensus of others before doing anything drastic.
+
+Also, rather than having to modify the key in data and parameter arrays in order to tell prepareData NOT to escape the data before insertion into the query, I've come up with a different method: wrap the value in an array. Example:
+
+$rows = $db->fetchAll('select * from users where id>:id', array('id' => array(5)));
+
+Notice above that the 2nd parameter of fetchAll is a parameter array that contains the named parameter "id". The value of the "id" element is an array containing a single value of 5. When the internals of dbFacile see that the value is an array, it won't be escaped or quoted. It'll be inserted into the query exactly as it is.
+
 2008-05-02
 
 Since PDO doesn't really return the number of affected rows for update and probably delete queries. What should I do? If the query fails, does it at least return false, and some non-false value to indicate the query string itself is valid?

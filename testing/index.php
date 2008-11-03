@@ -69,4 +69,25 @@ echo '<br /><br />after delete<br />';
 $row = $db->fetchRow('select * from test where c = ?', array('new'));
 var_dump($row);
 
+
+// did we ignore escaping of the specified fields?
+$id = $db->insert( array('c' => 'new2'), 'test');
+$db->update( array('c' => array('b')), 'test', 'c=?', array('new2'));
+echo '<br /><br />update with unescaped data (c=b)<br />';
+$row = $db->fetchRow('select * from test where b = ?', array($id));
+var_dump($row);
+
+// are we only using the old method of escape-ignoring?
+
+$db->filterInvalidFields = false;
+// did we ignore fields not present in the table?
+echo '<br /><br />insert with invalid field';
+$id = $db->insert( array('c' => 'new3', 'milk' => 'hey'), 'test');
+if($id) {
+	$row = $db->fetchRow('select * from test where b = ?', array($id));
+	var_dump($row);
+} else {
+	echo 'failed to insert';
+}
+
 ?>
