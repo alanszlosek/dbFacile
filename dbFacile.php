@@ -1,7 +1,7 @@
 <?php
 /*
 dbFacile - A Database API that should have existed from the start
-Version 0.4.2
+Version 0.4.3
 See LICENSE for license details.
 */
 
