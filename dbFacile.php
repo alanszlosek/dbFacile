@@ -710,6 +710,10 @@ class dbFacile_mysql extends dbFacile {
 		$version = mysql_get_server_info($this->connection);
 		$parts = explode('-', $version); // strip off non-numeric portion
 		$parts = explode('.', $parts[0]); // split numeric parts
+		
+		// return because this functionality is incomplete. see comment below
+		return array();
+		
 		if($parts[0] == '5' && ($parts[1] > '1' || ($parts[1] == '1' && $parts[2] >= '10'))) { // we can only fetch foreign-key info in 5.1.10+
 		
 			// this hasn't been tested yet, so please don't expect this to work
