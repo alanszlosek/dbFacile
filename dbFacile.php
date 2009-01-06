@@ -1,7 +1,7 @@
 <?php
 /*
 dbFacile - A Database API that should have existed from the start
-Version 0.4.1
+Version 0.4.2
 See LICENSE for license details.
 */
 
@@ -711,10 +711,18 @@ class dbFacile_mysql extends dbFacile {
 		$parts = explode('-', $version); // strip off non-numeric portion
 		$parts = explode('.', $parts[0]); // split numeric parts
 		if($parts[0] == '5' && ($parts[1] > '1' || ($parts[1] == '1' && $parts[2] >= '10'))) { // we can only fetch foreign-key info in 5.1.10+
-			$q = 'select CONSTRAINT_SCHEMA as foreignTable,CONSTRAINT_NAME as localField from INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS where TABLE_NAME=?';
-			$this->_query($q, array($table));
-			$rows = $this->_fetchKeyValue();
-			return $rows;
+		
+			// this hasn't been tested yet, so please don't expect this to work
+			// i'd appreciate it if someone with mysql 5.1 installed could test this and send me the results
+			$keys = array();
+			$q = 'select CONSTRAINT_SCHEMA as foreignTable,CONSTRAINT_NAME as foreignField, UNIQUE_CONSTRAINT_SCHEMA as localField from INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS where TABLE_NAME=?';
+			$this->execute($q, array($table), false);
+			foreach($this->_fetchAll() as $row) {
+				$keys[ $row['localField'] ] = array('table' => $row['foreignTable'], 'field' => $row['to']);
+			}
+			
+			return $keys;
+
 		} else {
 			return array();
 		}
