@@ -326,7 +326,7 @@ abstract class dbFacile {
 		if(sizeof($parameters) == 0)
 			return $sql;
 		
-		$parameters = dbPrepareData($parameters);
+		$parameters = $this->prepareData($parameters);
 		// separate the two types of parameters for easier handling
 		$questionParams = array();
 		$namedParams = array();
