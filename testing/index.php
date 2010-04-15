@@ -1,8 +1,8 @@
 <?php
 error_reporting(E_ALL);
-include('/home/switchprog/hg/dbFacile/dbFacile.php');
+include('../dbFacile.php');
 
-$db = dbFacile::open('sqlite', '/home/switchprog/hg/dbFacile/testing/testing.db');
+$db = dbFacile::open('sqlite', 'testing.db');
 $db->logToFile('db.log');
 
 //$create = true;
