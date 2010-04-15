@@ -325,31 +325,40 @@ abstract class dbFacile {
 		// bypass extra logic if we have no parameters
 		if(sizeof($parameters) == 0)
 			return $sql;
-		$parts = explode('?', $sql);
-		$query = array_shift($parts); // put on first part
-	
-		$parameters = $this->prepareData($parameters);
-		$newParams = array();
-		// replace question marks first
+		
+		$parameters = dbPrepareData($parameters);
+		// separate the two types of parameters for easier handling
+		$questionParams = array();
+		$namedParams = array();
 		foreach($parameters as $key => $value) {
 			if(is_numeric($key)) {
-				$query .= $value . array_shift($parts);
-				//$newParams[ $key ] = $value;
+				$questionParams[] = $value;
 			} else {
-				$newParams[ ':' . $key ] = $value;
+				$namedParams[ ':' . $key ] = $value;
 			}
 		}
-		// now replace name place-holders
-		// replace place-holders with quoted, escaped values
-		/*
-		var_dump($query);
-		var_dump($newParams);exit;
-		*/
-
-		// sort newParams in reverse to stop substring squashing
-		krsort($newParams);
-		$query = str_replace( array_keys($newParams), $newParams, $query);
-		//die($query);
+		// sort namedParams in reverse to stop substring squashing
+		krsort($namedParams);
+		
+		// split on question-mark and named placeholders
+		$result = preg_split('/(\?|:[a-zA-Z0-9_-]+)/', $sql, -1, PREG_SPLIT_NO_EMPTY|PREG_SPLIT_DELIM_CAPTURE);
+		
+		// every-other item in $result will be the placeholder that was found
+		
+		$query = '';
+		for($i = 0; $i < sizeof($result); $i+=2) {
+			$query .= $result[ $i ];
+			
+			$j = $i+1;
+			if(array_key_exists($j, $result)) {
+				$test = $result[ $j ];
+				if($test == '?') {
+					$query .= array_shift($questionParams);
+				} else {
+					$query .= $namedParams[ $test ]; 
+				}
+			}
+		}
 		return $query;
 	}
 
