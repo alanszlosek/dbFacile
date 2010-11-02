@@ -14,6 +14,7 @@ abstract class dbFacile {
 	protected $fieldNames;
 	protected $schemaNameField;
 	protected $schemaTypeField;
+	protected $addQuotes = true;
 
 	// these flags are not yet implemented (20080630)
 	// these flags may not ever be implemented. caching shouldn't occur at this level. (20080924)
@@ -93,6 +94,16 @@ abstract class dbFacile {
 				}
 				if(is_string($database)) {
 					$o = new dbFacile_sqlite();
+					$o->_open($database);
+				}
+				return $o;
+				break;
+			case 'sqlite3':
+				if(is_resource($database)) {
+					$o = new dbFacile_pdo_sqlite($database);
+				}
+				if(is_string($database)) {
+					$o = new dbFacile_pdo_sqlite();
 					$o->_open($database);
 				}
 				return $o;
@@ -401,9 +412,12 @@ abstract class dbFacile {
 			// that are aliases, or part of other tables through joins 
 			//if(!in_array($key, $columns)) // skip invalid fields
 			//	continue;
-			if($escape)
-				$values[$key] = "'" . $this->_escapeString($value) . "'";
-			else
+			if($escape) {
+				if($this->addQuotes)
+					$values[$key] = "'" . $this->_escapeString($value) . "'";
+				else
+					$values[$key] = $this->_escapeString($value);
+			} else
 				$values[$key] = $value;
 		}
 		return $values;
@@ -1046,6 +1060,7 @@ class dbFacile_pdo_postgresql extends dbFacile_pdo {
 		return $this->_fetchAll();
 	}
 }
+*/
 class dbFacile_pdo_sqlite extends dbFacile_pdo {
 	public function __construct($handle = null) {
 		parent::__construct($handle);
@@ -1080,27 +1095,40 @@ class dbFacile_pdo_sqlite2 extends dbFacile_pdo {
 }
 
 abstract class dbFacile_pdo extends dbFacile {
+	protected $statement;
 	function __construct($handle = null) {
 		parent::__construct();
+		$this->addQuotes = false;
 		$this->schemaNameField = 'name';
 		$this->schemaTypeField = 'type';
 		if($handle != null)
 			$this->connection = $handle;
 	}
+	protected function _affectedRows() {
+		return $this->result->rowCount();
+	}
 	protected function _open($type, $database, $user, $pass, $host) {
 		$this->connection = new PDO("$type:host=$host;dbname=$database", $user, $pass);
 	}
 	protected function _query($sql) {
-		$this->result = $this->connection->query($sql);
+		return $this->connection->query($sql);
 	}
 	protected function _escapeString($string) {
-		return sqlite_escape_string($string);
+		return $this->connection->quote($string);
 	}
 	protected function _error() {
-		return print_r($this->connection->errorInfo(), true);
+		$e = $this->connection->errorInfo();
+		return $e[2];
 	}
-	protected function _numberRecords() {
-		$this->numberRecords = $this->result->rowCount();
+	protected function _fields($table) {
+		return array();
+	}
+	protected function _foreignKeys($table) {
+		return array();
+	}
+	protected function _numberRows() {
+		return true;
+		return $this->result->rowCount();
 	}
 	protected function _fetch() {
 		return $this->result;
@@ -1114,24 +1142,28 @@ abstract class dbFacile_pdo extends dbFacile {
 	protected function _lastID() {
 		return $this->connection->lastInsertId();
 	}
+	protected function _rewind($result) {
+		reset($result);
+	}
 	protected function _schema($table) {
 		// getAttribute(PDO::DRIVER_NAME) to determine the sql to call
 		$this->execute('pragma table_info(' . $table. ')');
 		return $this->_fetchAll();
 	}
-	protected function _begin() {
+	protected function _tables() {
+		return array();
+	}
+	public function beginTransaction() {
 		$this->connection->beginTransaction();
 	}
-	protected function _commit() {
+	public function commitTransaction() {
 		$this->connection->commit();
 	}
-	protected function _rollback() {
+	public function rollbackTransaction() {
 		$this->connection->rollBack();
 	}
 	public function close() {
 		$this->connection = null;
 	}
 } // pdo
-*/
 
-?>
