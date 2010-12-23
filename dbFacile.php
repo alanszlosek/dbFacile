@@ -176,7 +176,7 @@ abstract class dbFacile {
 		// actually, shouldn't quote data yet, since PDO does it for us
 		//$data = $this->quoteData($data);
 
-		$sql = 'insert into ' . $table . ' (' . implode(',', array_keys($data)) . ') values(' . implode(',', $this->placeHolders($data)) . ')';
+		$sql = 'insert into ' . $table . ' (' . implode(',', $this->_quoteFields(array_keys($data))) . ') values(' . implode(',', $this->placeHolders($data)) . ')';
 
 		$this->beginTransaction();	
 		if($this->execute($sql, $data)) {
@@ -213,7 +213,7 @@ abstract class dbFacile {
 		// but how merge these field placeholders with actual $parameters array for the where clause
 		$sql = 'update ' . $table . ' set ';
 		foreach($data as $key => $value) {
-			$sql .= $key . '=:' . $key . ',';
+			$sql .= $this->_quoteField($key) . '=:' . $key . ',';
 		}
 		$sql = substr($sql, 0, -1); // strip off last comma
 
@@ -661,6 +661,13 @@ class dbFacile_mssql extends dbFacile {
 		return mssql_query($sql, $this->connection);
 	}
 
+	protected function _quoteField($field) {
+		return $field;
+	}
+	protected function _quoteFields($fields) {
+		return $fields;
+	}
+
 	protected function _rewind($result) {
 	}
 	
@@ -775,6 +782,13 @@ class dbFacile_mysql extends dbFacile {
 
 	protected function _query($sql) {
 		return mysql_query($sql, $this->connection);
+	}
+
+	protected function _quoteField($field) {
+		return '`' . $field . '`';
+	}
+	protected function _quoteFields($fields) {
+		return array_map(array($this, '_quoteField'), $fields);
 	}
 
 	protected function _rewind($result) {
@@ -1011,6 +1025,13 @@ class dbFacile_sqlite extends dbFacile {
 	protected function _query($sql) {
 		//var_dump($parameters);exit;
 		return sqlite_query($this->connection, $sql);
+	}
+
+	protected function _quoteField($field) {
+		return '"' . $field . '"';
+	}
+	protected function _quoteFields($fields) {
+		return array_map(array($this, '_quoteField'), $fields);
 	}
 
 	protected function _rewind($result) {
