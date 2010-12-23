@@ -1,10 +1,10 @@
 <?php
 // this file is for testing non-query operations
 error_reporting(E_ALL);
-include('/home/switchprog/hg/dbFacile/dbFacile.php');
+include('../dbFacile.php');
 
 // does it pull the schema properly
-$db = dbFacile::open('sqlite', '/home/switchprog/hg/dbFacile/testing/ecommerce.db');
+$db = dbFacile::open('sqlite', 'ecommerce.db');
 $db->logToFile('db2.log');
 $db->cacheSchemaToFile('schema.cache.php');
 

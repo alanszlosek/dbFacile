@@ -2,7 +2,7 @@
 error_reporting(E_ALL);
 include('../dbFacile.php');
 
-$db = dbFacile::open('sqlite', 'testing.db');
+$db = dbFacile::open('sqlite3', 'testing.sqlite3.db');
 $db->logToFile('db.log');
 
 //$create = true;
@@ -90,10 +90,5 @@ if($id) {
 } else {
 	echo 'failed to insert';
 }
-
-echo '<br /><br />how does it handle queries without placeholders even though parameters were passed in?<br />';
-$row = $db->fetchRow('select * from test where b > 1', array(1, 2));
-echo 'select * from test where b > 1<br />';
-var_dump($row);
 
 ?>

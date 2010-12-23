@@ -14,6 +14,7 @@ abstract class dbFacile {
 	protected $fieldNames;
 	protected $schemaNameField;
 	protected $schemaTypeField;
+	protected $addQuotes = true;
 
 	// these flags are not yet implemented (20080630)
 	// these flags may not ever be implemented. caching shouldn't occur at this level. (20080924)
@@ -97,6 +98,16 @@ abstract class dbFacile {
 				}
 				return $o;
 				break;
+			case 'sqlite3':
+				if(is_resource($database)) {
+					$o = new dbFacile_pdo_sqlite($database);
+				}
+				if(is_string($database)) {
+					$o = new dbFacile_pdo_sqlite();
+					$o->_open($database);
+				}
+				return $o;
+				break;
 		}
 	}
 
@@ -165,7 +176,7 @@ abstract class dbFacile {
 		// actually, shouldn't quote data yet, since PDO does it for us
 		//$data = $this->quoteData($data);
 
-		$sql = 'insert into ' . $table . ' (' . implode(',', array_keys($data)) . ') values(' . implode(',', $this->placeHolders($data)) . ')';
+		$sql = 'insert into ' . $table . ' (' . implode(',', $this->_quoteFields(array_keys($data))) . ') values(' . implode(',', $this->placeHolders($data)) . ')';
 
 		$this->beginTransaction();	
 		if($this->execute($sql, $data)) {
@@ -202,7 +213,7 @@ abstract class dbFacile {
 		// but how merge these field placeholders with actual $parameters array for the where clause
 		$sql = 'update ' . $table . ' set ';
 		foreach($data as $key => $value) {
-			$sql .= $key . '=:' . $key . ',';
+			$sql .= $this->_quoteField($key) . '=:' . $key . ',';
 		}
 		$sql = substr($sql, 0, -1); // strip off last comma
 
@@ -325,31 +336,40 @@ abstract class dbFacile {
 		// bypass extra logic if we have no parameters
 		if(sizeof($parameters) == 0)
 			return $sql;
-		$parts = explode('?', $sql);
-		$query = array_shift($parts); // put on first part
-	
+		
 		$parameters = $this->prepareData($parameters);
-		$newParams = array();
-		// replace question marks first
+		// separate the two types of parameters for easier handling
+		$questionParams = array();
+		$namedParams = array();
 		foreach($parameters as $key => $value) {
 			if(is_numeric($key)) {
-				$query .= $value . array_shift($parts);
-				//$newParams[ $key ] = $value;
+				$questionParams[] = $value;
 			} else {
-				$newParams[ ':' . $key ] = $value;
+				$namedParams[ ':' . $key ] = $value;
 			}
 		}
-		// now replace name place-holders
-		// replace place-holders with quoted, escaped values
-		/*
-		var_dump($query);
-		var_dump($newParams);exit;
-		*/
-
-		// sort newParams in reverse to stop substring squashing
-		krsort($newParams);
-		$query = str_replace( array_keys($newParams), $newParams, $query);
-		//die($query);
+		// sort namedParams in reverse to stop substring squashing
+		krsort($namedParams);
+		
+		// split on question-mark and named placeholders
+		$result = preg_split('/(\?|:[a-zA-Z0-9_-]+)/', $sql, -1, PREG_SPLIT_NO_EMPTY|PREG_SPLIT_DELIM_CAPTURE);
+		
+		// every-other item in $result will be the placeholder that was found
+		
+		$query = '';
+		for($i = 0; $i < sizeof($result); $i+=2) {
+			$query .= $result[ $i ];
+			
+			$j = $i+1;
+			if(array_key_exists($j, $result)) {
+				$test = $result[ $j ];
+				if($test == '?') {
+					$query .= array_shift($questionParams);
+				} else {
+					$query .= $namedParams[ $test ]; 
+				}
+			}
+		}
 		return $query;
 	}
 
@@ -392,9 +412,12 @@ abstract class dbFacile {
 			// that are aliases, or part of other tables through joins 
 			//if(!in_array($key, $columns)) // skip invalid fields
 			//	continue;
-			if($escape)
-				$values[$key] = "'" . $this->_escapeString($value) . "'";
-			else
+			if($escape) {
+				if($this->addQuotes)
+					$values[$key] = "'" . $this->_escapeString($value) . "'";
+				else
+					$values[$key] = $this->_escapeString($value);
+			} else
 				$values[$key] = $value;
 		}
 		return $values;
@@ -638,6 +661,13 @@ class dbFacile_mssql extends dbFacile {
 		return mssql_query($sql, $this->connection);
 	}
 
+	protected function _quoteField($field) {
+		return $field;
+	}
+	protected function _quoteFields($fields) {
+		return $fields;
+	}
+
 	protected function _rewind($result) {
 	}
 	
@@ -752,6 +782,13 @@ class dbFacile_mysql extends dbFacile {
 
 	protected function _query($sql) {
 		return mysql_query($sql, $this->connection);
+	}
+
+	protected function _quoteField($field) {
+		return '`' . $field . '`';
+	}
+	protected function _quoteFields($fields) {
+		return array_map(array($this, '_quoteField'), $fields);
 	}
 
 	protected function _rewind($result) {
@@ -990,6 +1027,13 @@ class dbFacile_sqlite extends dbFacile {
 		return sqlite_query($this->connection, $sql);
 	}
 
+	protected function _quoteField($field) {
+		return '"' . $field . '"';
+	}
+	protected function _quoteFields($fields) {
+		return array_map(array($this, '_quoteField'), $fields);
+	}
+
 	protected function _rewind($result) {
 		sqlite_rewind($result);
 	}
@@ -1037,6 +1081,7 @@ class dbFacile_pdo_postgresql extends dbFacile_pdo {
 		return $this->_fetchAll();
 	}
 }
+*/
 class dbFacile_pdo_sqlite extends dbFacile_pdo {
 	public function __construct($handle = null) {
 		parent::__construct($handle);
@@ -1071,27 +1116,40 @@ class dbFacile_pdo_sqlite2 extends dbFacile_pdo {
 }
 
 abstract class dbFacile_pdo extends dbFacile {
+	protected $statement;
 	function __construct($handle = null) {
 		parent::__construct();
+		$this->addQuotes = false;
 		$this->schemaNameField = 'name';
 		$this->schemaTypeField = 'type';
 		if($handle != null)
 			$this->connection = $handle;
 	}
+	protected function _affectedRows() {
+		return $this->result->rowCount();
+	}
 	protected function _open($type, $database, $user, $pass, $host) {
 		$this->connection = new PDO("$type:host=$host;dbname=$database", $user, $pass);
 	}
 	protected function _query($sql) {
-		$this->result = $this->connection->query($sql);
+		return $this->connection->query($sql);
 	}
 	protected function _escapeString($string) {
-		return sqlite_escape_string($string);
+		return $this->connection->quote($string);
 	}
 	protected function _error() {
-		return print_r($this->connection->errorInfo(), true);
+		$e = $this->connection->errorInfo();
+		return $e[2];
 	}
-	protected function _numberRecords() {
-		$this->numberRecords = $this->result->rowCount();
+	protected function _fields($table) {
+		return array();
+	}
+	protected function _foreignKeys($table) {
+		return array();
+	}
+	protected function _numberRows() {
+		return true;
+		return $this->result->rowCount();
 	}
 	protected function _fetch() {
 		return $this->result;
@@ -1105,24 +1163,28 @@ abstract class dbFacile_pdo extends dbFacile {
 	protected function _lastID() {
 		return $this->connection->lastInsertId();
 	}
+	protected function _rewind($result) {
+		reset($result);
+	}
 	protected function _schema($table) {
 		// getAttribute(PDO::DRIVER_NAME) to determine the sql to call
 		$this->execute('pragma table_info(' . $table. ')');
 		return $this->_fetchAll();
 	}
-	protected function _begin() {
+	protected function _tables() {
+		return array();
+	}
+	public function beginTransaction() {
 		$this->connection->beginTransaction();
 	}
-	protected function _commit() {
+	public function commitTransaction() {
 		$this->connection->commit();
 	}
-	protected function _rollback() {
+	public function rollbackTransaction() {
 		$this->connection->rollBack();
 	}
 	public function close() {
 		$this->connection = null;
 	}
 } // pdo
-*/
 
-?>
