@@ -90,4 +90,9 @@ if($id) {
 	echo 'failed to insert';
 }
 
+echo '<br /><br />how does it handle queries without placeholders even though parameters were passed in?<br />';
+$row = $db->fetchRow('select * from test where b > 1', array(1, 2));
+echo 'select * from test where b > 1<br />';
+var_dump($row);
+
 ?>
