@@ -5,8 +5,8 @@ Copyright (C) 2007-2008 Alan Szlosek
 
 FUTURE ITEMS AND IDEAS
 
+- important (got a comment about this): quote all table and field references in single-quotes or backticks, whichever is appropriate for connected DB
 - fix the workaround for when you don't want fields escaped or quoted (insert/update)
-- quote all table and field references in single-quotes or backticks, whichever is appropriate for connected DB
 - table prefix to prepend to all tables (except for hand-typed queries)? might be too much work
 - getTables()
 - error out if don't have dbHandle
