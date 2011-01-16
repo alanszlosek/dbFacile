@@ -56,9 +56,9 @@ II. Usage
 		
 		$db->update( array('name' => 'Aideen'), 'users', 'name="Aiden"') : Updates records in table with associative array of data satisfying where clause. Returns the number of affected rows.
 
-		<strong>Note:</strong> As used above, all values present in the associative array will be escaped and quoted for use in the constructed query. If a field should <em>not</em> be quoted or escaped, append "=" to the name of the field in the data array. This means you can do things like this (note the equal sign after the name key in the first parameter):
+		<strong>Note:</strong> As used above, all values present in the associative array will be escaped and quoted for use in the constructed query. If a field should <em>not</em> be quoted or escaped, wrap the value in an array:
 
-		$db->update( array('name=' => 'concat(first_name," ",last_name)'), 'users');
+		$db->update( array('name' => array('concat(first_name," ",last_name)')), 'users');
 
 		The above MySql example will update the name field of each user record with a concatenation of the first_name and last_name fields. Note the reference to concat(), a MySql function.
 		

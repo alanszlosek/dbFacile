@@ -394,15 +394,8 @@ abstract class dbFacile {
 
 		foreach($data as $key=>$value) {
 			$escape = true;
-			// don't quote or esc
-			/*
-			if(substr($key,-1) == '=') {
-				$escape = false;
-				$key = substr($key, 0, strlen($key)-1);
-			}
-			*/
-			// new way to determine whether to quote and escape
-			// if value is an array, we treat it as a "decorator" that tells us not to escape the
+			// don't quote or esc if value is an array, we treat it
+			// as a "decorator" that tells us not to escape the
 			// value contained in the array
 			if(is_array($value) && !is_object($value)) {
 				$escape = false;
