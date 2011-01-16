@@ -265,7 +265,7 @@ abstract class dbFacile {
 	public function fetchRow($sql = null, $parameters = array()) {
 		if($sql != null)
 			$this->execute($sql, $parameters);
-		if($this->result)
+		if(is_resource($this->result))
 			return $this->_fetchRow();
 		return null;
 	}
