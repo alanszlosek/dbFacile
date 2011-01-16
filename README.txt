@@ -63,9 +63,9 @@ II. Usage
 		The above MySql example will update the name field of each user record with a concatenation of the first_name and last_name fields. Note the reference to concat(), a MySql function.
 		
 		The update() method can also take additional parameters that act as a where clause. Here are some examples:
-			$db->update( array('name=' => 'John'), 'users', array('id=3'));
-			$db->update( array('name=' => 'John'), 'users', 'id=? and email=?', array(3, 'a@g.com'));
-			$db->update( array('name=' => 'John'), 'users', array('id=? and email=?', array(3, 'a@g.com')));
+			$db->update( array('name' => 'John'), 'users', array('id=3'));
+			$db->update( array('name' => 'John'), 'users', 'id=? and email=?', array(3, 'a@g.com'));
+			$db->update( array('name' => 'John'), 'users', array('id=? and email=?', array(3, 'a@g.com')));
 
 	D. Transactions
 	
