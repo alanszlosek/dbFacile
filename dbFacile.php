@@ -45,7 +45,7 @@ abstract class dbFacile {
 	protected abstract function _foreignKeys($table);
 	protected abstract function _lastID();
 	protected abstract function _numberRows();
-	protected abstract function _query($sql);
+	protected abstract function _query($sql, $buffered = true);
 	protected abstract function _rewind($result);
 	protected abstract function _tables();
 
@@ -119,7 +119,7 @@ abstract class dbFacile {
 	 * Performs a query using the given string.
 	 * Used by the other _query functions.
 	 * */
-	public function execute($sql, $parameters = array()) {
+	public function execute($sql, $parameters = array(), $buffered = true) {
 		$this->query = $sql;
 		$this->parameters = $parameters;
 
@@ -128,7 +128,7 @@ abstract class dbFacile {
 		if($this->logFile)
 			$time_start = microtime(true);
 
-		$this->result = $this->_query($fullSql); // sets $this->result
+		$this->result = $this->_query($fullSql, $buffered); // sets $this->result
 		
 		if($this->logFile) {
 			$time_end = microtime(true);
@@ -236,19 +236,17 @@ abstract class dbFacile {
 	}
 
 	/*
-	 * Fetches all of the rows (associatively) from the last performed query.
-	 * Most other retrieval functions build off this
+	 * Fetches all of the rows where each is an associative array.
+	 * Tries to use unbuffered queries to cut down on execution time and memory usage,
+	 * but you'll only see a benefit with extremely large result sets.
 	 * */
 	public function fetchAll($sql, $parameters = array()) {
-		//$sql = $this->transformPlaceholders(func_get_args());
-		$this->execute($sql, $parameters);
-		if($this->_numberRows()) {
+		$this->execute($sql, $parameters, false);
+		if ($this->result)
 			return $this->_fetchAll();
-		}
-		// no records, thus return empty array
-		// which should evaluate to false, and will prevent foreach notices/warnings 
 		return array();
 	}
+
 	/*
 	 * This is intended to be the method used for large result sets.
 	 * It is intended to return an iterator, and act upon buffered data.
@@ -557,7 +555,7 @@ abstract class dbFacile {
 /*
  * To create a new driver, implement the following:
  * protected _open(...)
- * protected _query($sql, $parameters)
+ * protected _query($sql, $buffered)
  * protected _escapeString
  * protected _error
  * protected _affectedRows
@@ -650,7 +648,7 @@ class dbFacile_mssql extends dbFacile {
 	protected function _primaryKey($table) {
 	}
 
-	protected function _query($sql) {
+	protected function _query($sql, $buffered = true) {
 		return mssql_query($sql, $this->connection);
 	}
 
@@ -773,8 +771,13 @@ class dbFacile_mysql extends dbFacile {
 		return $this->connection;
 	}
 
-	protected function _query($sql) {
-		return mysql_query($sql, $this->connection);
+	protected function _query($sql, $buffered = true) {
+		if ($buffered)
+			return mysql_query($sql, $this->connection);
+		else {
+			echo 'un';
+			return mysql_unbuffered_query($sql, $this->connection);
+		}
 	}
 
 	protected function _quoteField($field) {
@@ -810,7 +813,7 @@ class dbFacile_mysqli extends dbFacile {
 			$args[3] = 'localhost';
 		$this->connection = mysqli_connect($args[3], $args[0], $args[1], $args[2]);
 	}
-	protected function _query($query) {
+	protected function _query($query, $buffered = true) {
 		$this->result = mysqli_query($this->connection, $query);
 	}
 	protected function _escapeString($string) {
@@ -879,7 +882,7 @@ class dbFacile_postgresql extends dbFacile {
 		$this->connection = pg_connect("host=$host dbname=$database port=5432 user=$user password=$password");
 		return $this->connection;
 	}
-	protected function _query($sql, $parameters) {
+	protected function _query($sql, $buffered = true) {
 		$sql = $this->makeQuery($sql, $parameters);
 		return pg_query($this->connection, $sql);
 	}
@@ -1015,7 +1018,7 @@ class dbFacile_sqlite extends dbFacile {
 		return $this->connection;
 	}
 
-	protected function _query($sql) {
+	protected function _query($sql, $buffered = true) {
 		//var_dump($parameters);exit;
 		return sqlite_query($this->connection, $sql);
 	}
@@ -1124,7 +1127,7 @@ abstract class dbFacile_pdo extends dbFacile {
 	protected function _open($type, $database, $user, $pass, $host) {
 		$this->connection = new PDO("$type:host=$host;dbname=$database", $user, $pass);
 	}
-	protected function _query($sql) {
+	protected function _query($sql, $buffered = true) {
 		return $this->connection->query($sql);
 	}
 	protected function _escapeString($string) {
