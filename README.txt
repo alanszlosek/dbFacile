@@ -34,11 +34,13 @@ II. Usage
 
 	B. Fetching Data
 	
-		$rows = $db->fetch('select * from users') : Performs SQL query and returns two-dimensional array of rows and their named columns.
+		$rows = $db->fetch('select * from users') : Performs SQL query and returns two-dimensional array of rows and their named columns. In some cases this returns an iterator object that acts like an array of rows.
 		foreach($rows as $row) {
 			echo $row['email'] . '<br />';
 		}
 		This may not look any simpler than the standard PHP API functions, but having all the data available as a two-dimensional array is beneficial because you don't have to manually fetch each row. Treat the data as you would any array of data.
+
+		$db->fetchAll('select * from users') : Performs SQL query and returns two-dimensional array of rows and their named columns. Currently, the MySQL driver uses unbuffered queries to perform the operation, which may be beneficial for large result-sets.
 		
 		$row = $db->fetchRow('select * from users') : Performs SQL query and returns one-dimensional associative array of fields and values.
 		
