@@ -34,7 +34,7 @@ II. Usage
 
 	B. Fetching Data
 	
-		$rows = $db->fetch('select * from users') : Performs SQL query and returns two-dimensional array of rows and their named columns. In some cases this returns an iterator object that acts like an array of rows.
+		$rows = $db->fetch('select * from users') : Performs SQL query and returns two-dimensional array of rows and their named columns. (I'd like for this to return an iterator that acts like an array, but haven't found a use-case where it is beneficial.)
 		foreach($rows as $row) {
 			echo $row['email'] . '<br />';
 		}

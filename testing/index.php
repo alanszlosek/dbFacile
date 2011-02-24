@@ -21,16 +21,16 @@ if($create) {
 	$db->buildSchema();
 }
 
-echo 'fetch (select * from test)<br />';
+echo 'fetchAll (select * from test)<br />';
 $rows = $db->fetchAll('select * from test');
 var_dump($rows);
 
-echo '<br /><br />fetch with ? (select * from test where b > 1)<br />';
+echo '<br /><br />fetchAll with ? (select * from test where b > 1)<br />';
 $rows = $db->fetchAll('select * from test where b > ?', array('1'));
 var_dump($rows);
 
 // tests name parameter substring squashing
-echo '<br /><br />fetch with name params (select * from test where b = 1 or b = 2)<br />';
+echo '<br /><br />fetchAll with name params (select * from test where b = 1 or b = 2)<br />';
 $rows = $db->fetchAll('select * from test where b = :aa or b = :aab', array('aa' => '1', 'aab' => 2));
 var_dump($rows);
 

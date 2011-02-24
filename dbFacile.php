@@ -708,7 +708,6 @@ class dbFacile_mysql extends dbFacile {
 			$data[] = $row;
 		}
 		//mysql_free_result($this->result);
-		// rewind?
 		return $data;
 	}
 
