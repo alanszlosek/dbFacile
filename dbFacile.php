@@ -763,7 +763,8 @@ class dbFacile_mysql extends dbFacile {
 	// user, password, database, host
 	protected function _open($database, $user, $password, $host) {
 		$this->database = $database;
-		$this->connection = mysql_connect($host, $user, $password);
+		// force opening a new link because we might be selecting a different database
+		$this->connection = mysql_connect($host, $user, $password, true);
 		if($this->connection)
 			mysql_select_db($database, $this->connection);
 		//$this->buildSchema();
