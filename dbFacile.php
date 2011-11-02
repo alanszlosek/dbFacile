@@ -72,7 +72,7 @@ abstract class dbFacile {
 			fclose($this->logFile);
 	}
 	
-	public static function open($type, $database, $user = '', $password = '', $host = 'localhost') {
+	public static function open($type, $database, $user = '', $password = '', $host = 'localhost', $charset = 'utf8') {
 		// try to use PDO if available
 		switch($type) {
 			case 'mssql':
@@ -84,7 +84,7 @@ abstract class dbFacile {
 				}
 				if(is_string($database)) {
 					$o = new $name();
-					$o->_open($database, $user, $password, $host);
+					$o->_open($database, $user, $password, $host, $charset);
 				}
 				return $o;
 				break;
@@ -761,12 +761,14 @@ class dbFacile_mysql extends dbFacile {
 	}
 	
 	// user, password, database, host
-	protected function _open($database, $user, $password, $host) {
+	protected function _open($database, $user, $password, $host, $charset) {
 		$this->database = $database;
 		// force opening a new link because we might be selecting a different database
 		$this->connection = mysql_connect($host, $user, $password, true);
 		if($this->connection)
 			mysql_select_db($database, $this->connection);
+		if ($charset)
+			mysql_set_charset($charset, $this->connection);
 		//$this->buildSchema();
 		return $this->connection;
 	}
