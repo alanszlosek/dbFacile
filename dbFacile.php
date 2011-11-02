@@ -775,7 +775,6 @@ class dbFacile_mysql extends dbFacile {
 		if ($buffered)
 			return mysql_query($sql, $this->connection);
 		else {
-			echo 'un';
 			return mysql_unbuffered_query($sql, $this->connection);
 		}
 	}
