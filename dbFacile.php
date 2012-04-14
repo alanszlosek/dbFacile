@@ -100,12 +100,21 @@ abstract class dbFacile {
 				break;
 			case 'sqlite3':
 				if(is_resource($database)) {
+					$o = new dbFacile_sqlite3($database);
+				}
+				if(is_string($database)) {
+					$o = new dbFacile_sqlite3();
+					$o->_open($database);
+				}
+				/*
+				if(is_resource($database)) {
 					$o = new dbFacile_pdo_sqlite($database);
 				}
 				if(is_string($database)) {
 					$o = new dbFacile_pdo_sqlite();
 					$o->_open($database);
 				}
+				*/
 				return $o;
 				break;
 		}
@@ -263,7 +272,8 @@ abstract class dbFacile {
 	public function fetchRow($sql = null, $parameters = array()) {
 		if($sql != null)
 			$this->execute($sql, $parameters);
-		if(is_resource($this->result))
+		// not all resources look like resources
+		if($this->result)
 			return $this->_fetchRow();
 		return null;
 	}
@@ -1040,6 +1050,111 @@ class dbFacile_sqlite extends dbFacile {
 	}
 } // sqlite
 
+class dbFacile_sqlite3 extends dbFacile_sqlite {
+	public function beginTransaction() {
+		$this->_query('begin transaction');
+	}
+
+	public function close() {
+		$this->connection->close();
+	}
+
+	public function commitTransaction() {
+		$this->_query('commit transaction');
+	}
+
+	public function rollbackTransaction() {
+		$this->_query('rollback transaction');
+	}
+
+	protected function _affectedRows() {
+		return $this->connection->changes();
+	}
+
+	protected function _error() {
+		return $this->connection->lastErrorMsg();
+	}
+
+	protected function _escapeString($string) {
+		return $this->connection->escapeString($string);
+	}
+
+	protected function _fetch() {
+		return new dbFacile_sqlite3_result($this->result);
+	}
+
+	protected function _fetchAll() {
+		// loop
+		$rows = array();
+		while($row = $this->_fetchRow()) {
+			$rows[] = $row;
+		}
+		return $rows;
+	}
+
+	// when passed result
+	// returns next row
+	protected function _fetchRow() {
+		return $this->result->fetchArray(SQLITE3_ASSOC);
+	}
+
+	protected function _fields($table) {
+		$fields = array();
+		foreach($this->fetchAll('pragma table_info(' . $table. ')') as $row) {
+			$type = strtolower(preg_replace('/\(.*\)/', '', $row['type'])); // remove size specifier
+			$name = $row['name'];
+			$fields[ $name ] = array('type' => $type, 'primaryKey' => ($row['pk'] == '1'));
+		}
+		return $fields;
+	}
+
+	protected function _foreignKeys($table) {
+		$keys = array();
+		$this->execute('pragma foreign_key_list(' . $table . ')', array(), false);
+		foreach($this->_fetchAll() as $row) {
+			$keys[ $row['from'] ] = array('table' => $row['table'], 'field' => $row['to']);
+		}
+		return $keys;
+	}
+
+	protected function _lastID() {
+		return $this->connection->lastInsertRowID();
+	}
+
+	protected function _numberRows() {
+		$rows = $this->_fetchAll();
+		return sizeof($rows);
+	}
+
+	protected function _open($database) {
+		$this->connection = new SQLite3($database);
+		//$this->buildSchema();
+		return $this->connection;
+	}
+
+	protected function _query($sql, $buffered = true) {
+		//var_dump($parameters);exit;
+		return $this->connection->query($sql);
+	}
+
+	protected function _quoteField($field) {
+		return '"' . $field . '"';
+	}
+	protected function _quoteFields($fields) {
+		return array_map(array($this, '_quoteField'), $fields);
+	}
+
+	protected function _rewind($result) {
+		$result->reset();
+	}
+
+	protected function _tables() {
+		if(!$this->execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name", array(), false))
+			die('Failed to get tables');
+		return $this->_fetchAll();
+	}
+} // sqlite3
+
 /*
 class dbFacile_sqlite_result implements Iterator {
 	private $result;
@@ -1083,9 +1198,10 @@ class dbFacile_pdo_sqlite extends dbFacile_pdo {
 		$this->schemaNameField = 'name';
 		$this->schemaTypeField = 'type';
 		$this->schemaPrimaryKeyField = 'pk';
+		echo 'here';
 	}
 	protected function _open($database) {
-		$this->connection = new PDO("sqlite:$database");
+		$this->connection = new PDO('sqlite:' . $database);
 	}
 	protected function _schema($table) {
 		// getAttribute(PDO::DRIVER_NAME) to determine the sql to call
@@ -1157,6 +1273,12 @@ abstract class dbFacile_pdo extends dbFacile {
 	}
 	protected function _lastID() {
 		return $this->connection->lastInsertId();
+	}
+	protected function _quoteField($field) {
+		return '`' . $field . '`';
+	}
+	protected function _quoteFields($fields) {
+		return array_map(array($this, '_quoteField'), $fields);
 	}
 	protected function _rewind($result) {
 		reset($result);
