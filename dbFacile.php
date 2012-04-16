@@ -272,7 +272,7 @@ abstract class dbFacile {
 	public function fetchRow($sql = null, $parameters = array()) {
 		if($sql != null)
 			$this->execute($sql, $parameters);
-		// not all resources look like resources
+		// not all results look like resources, so can't use is_resource()
 		if($this->result)
 			return $this->_fetchRow();
 		return null;
