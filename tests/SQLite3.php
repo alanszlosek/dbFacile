@@ -1,7 +1,7 @@
 <?php
 include('../splitup/dbFacile_sqlite3.php');
 
-class Main extends PHPUnit_Framework_TestCase {
+class sqlite3_test extends PHPUnit_Framework_TestCase {
 	protected static $db;
 
 	protected $rows1 = array(
@@ -112,6 +112,21 @@ class Main extends PHPUnit_Framework_TestCase {
 		$row = $db->fetchRow('select b,c from test where b=4');
 		$data['b'] = 4;
 		$this->assertEquals($data, $row);
+	}
+
+	public function testDeleteWhereString() {
+		$db = Main::$db;
+		$db->delete('test', 'b=?', array('2'));
+		$row = $db->fetchRow('select b,c from test where b=?', array('2'));
+		$this->assertEquals(false, $row);
+	}
+
+	public function testDeleteWhereArray() {
+		$db = Main::$db;
+		$data = array('c' => 'new');
+		$db->delete('test', $data);
+		$row = $db->fetchRow('select b,c from test where b=?', array('new'));
+		$this->assertEquals(false, $row);
 	}
 }
 
