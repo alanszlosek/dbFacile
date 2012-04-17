@@ -1,36 +1,35 @@
 dbFacile - The easily used PHP Database Abstraction Class
-Version 0.4.1
-Copyright (C) 2007-2008 Alan Szlosek
+Copyright (C) 2007-2012 Alan Szlosek
 
 ----
 
 README
 
-For now, this has limited information.
+I've changed quite a bit in April 2012 ... so I need to give more information about placeholders and some delete() changes.
 
 I. Installation
 
-	1. Copy dbFacile.php to a location in your document root
-	2. Include dbFacile.php in your PHP script
-	3. Create a new instance of it, passing DB connection parameters
-	4. Use.
+	1. Copy dbFacile.php and the appropriate driver file to a location in your document root
+	2. Include dbFacile_DRIVER.php in your PHP script (replace DRIVER with lowercase name of database)
+	3. Create a new instance of the class (like dbFacile_mysql)
+	4. Call open(), passing DB connection parameters
+	5. Use.
 
 II. Usage
 
 	A. Instantiation
 
-		$db = dbFacile::open(TYPE, DATABASE_NAME, USERNAME, PASSWORD, HOSTNAME);
+		$db = new dbFacile_mysql(DATABASE_NAME, USERNAME, PASSWORD, HOSTNAME);
 		
-		Valid TYPEs are: mssql, mysql, sqlite.
-		In the future we'll also have: postgresql, pdo_mssql, pdo_mysql, pdo_postgresql, pdo_sqlite, pdo_sqlite2.
+		Valid TYPEs are: mysql, sqlite2, sqlite3.
+		In the future we'll also have: mssql, postgresql
 		
 		When using SQLite, the open method only needs the file path to the database file.
 		
 		If you've already established a Database connection and still want to make use of dbFacile, you're in luck. Simple pass a handle to the current connection into the constructor.
 		For mysql, you can also do the following because an empty call to mysql_connect() returns the current connection resource.
-			$db = dbFacile::open('mysql', mysql_connect());
+			$db = new dbFacile_mysql(mysql_connect());
 
-		You can also enable query logging by calling $db->logToFile(FILENAME).
 
 	B. Fetching Data
 	
