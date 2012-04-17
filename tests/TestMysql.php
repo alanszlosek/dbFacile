@@ -1,5 +1,5 @@
 <?php
-require_once('../splitup/dbFacile_mysql.php');
+require_once('../src/dbFacile_mysql.php');
 require('TestSqlite3.php');
 
 class TestMysql extends TestSqlite3 {

@@ -1,5 +1,5 @@
 <?php
-include_once('../splitup/dbFacile_sqlite3.php');
+include_once('../src/dbFacile_sqlite3.php');
 
 class TestSqlite3 extends PHPUnit_Framework_TestCase {
 	protected $db;
