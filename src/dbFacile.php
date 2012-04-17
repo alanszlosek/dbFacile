@@ -5,10 +5,6 @@ Version 0.4.3
 See LICENSE for license details.
 */
 
-
-// is prepareData used anymore?
-// use wherehelper when possible
-
 abstract class dbFacile {
 	protected $connection; // handle to Database connection
 	protected $logFile;
