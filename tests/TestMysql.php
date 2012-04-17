@@ -1,7 +1,7 @@
 <?php
-include('sqlite3.php');
+include('TestSqlite3.php');
 
-class mysql extends sqlite3 {
+class TestMysql extends TestSqlite3 {
 
         public static function setUpBeforeClass() {
                 $db = new dbFacile_mysql();
