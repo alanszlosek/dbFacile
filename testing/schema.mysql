@@ -1,1 +1,0 @@
-create table test (b int(11) auto_increment, c varchar(255), primary key(b));
