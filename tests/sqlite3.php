@@ -14,7 +14,6 @@ class sqlite3_test extends PHPUnit_Framework_TestCase {
 	);
 
         public static function setUpBeforeClass() {
-		unlink('sqlite3.db');
                 $db = new dbFacile_sqlite3();
 		$db->open('sqlite3.db');
 
@@ -26,6 +25,9 @@ class sqlite3_test extends PHPUnit_Framework_TestCase {
 		$db->execute('create table test (b integer primary key autoincrement, c text)');
 		$db->execute('create table test2 (id integer, name text, primary key (id,name))');
 		Main::$db = $db;
+	}
+	public static function tearDownAfterClass() {
+		unlink('sqlite3.db');
 	}
 
         public function testInsertReportsKey() {
