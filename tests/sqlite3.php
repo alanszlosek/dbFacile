@@ -1,7 +1,7 @@
 <?php
 include('../splitup/dbFacile_sqlite3.php');
 
-class sqlite3_test extends PHPUnit_Framework_TestCase {
+class TestSqlite3 extends PHPUnit_Framework_TestCase {
 	protected static $db;
 
 	protected $rows1 = array(
