@@ -5,6 +5,10 @@ Version 0.4.3
 See LICENSE for license details.
 */
 
+
+// is prepareData used anymore?
+// use wherehelper when possible
+
 abstract class dbFacile {
 	protected $connection; // handle to Database connection
 	protected $logFile;
@@ -69,20 +73,13 @@ abstract class dbFacile {
 	 * Check for boolean false to determine whether insert failed
 	 * */
 	public function insert($data, $table) {
-		// quote character
-		// maybe pre-split these for use by makequery
+		// Might need to use driver-specific quoteField() instead of this
+		// But only if one of the DBMSes we support doesn't use backticks
 		$sql = 'insert into ' . $table . ' (`' . implode('`,`', array_keys($data)) . '`) values(?' . str_repeat(',?', sizeof($data)-1) . ')';
-
-		$this->beginTransaction();	
 		$result = $this->execute($sql, $data);
-		if($result) {
-			$id = $this->lastID($result);
-			$this->commitTransaction();
-			return $id;
-		} else {
-			$this->rollbackTransaction();
-			return false;
-		}
+		if(!$result) return false;
+
+		return $this->lastID($result);
 	}
 
 	/*
@@ -98,30 +95,19 @@ abstract class dbFacile {
 			$sql .= $this->quoteField($key) . '=?,';
 		}
 		$sql = substr($sql, 0, -1); // strip off last comma
+		$data = array_values($data);
 
 		if($where) {
-			$sql .= ' where ' . $where;
-			$data = array_merge($data, $parameters);
+			$sql .= $this->whereHelper($where, $parameters);
+			if($parameters) $data = array_merge($data, $parameters);
 		}
-
 		$result = $this->execute($sql, $data);
 		return $this->affectedRows($result);
 	}
 
 	public function delete($table, $where = null, $parameters = array()) {
 		$sql = 'DELETE FROM ' . $table;
-		if($where) {
-			$sql .= ' WHERE ';
-			if (is_array($where)) {
-				$parameters = array_values($where);
-				$w = array();
-				foreach (array_keys($where) as $a) {
-					$w[] = $this->quoteField($a) . '=?'; 
-				}
-				$sql .= implode(' AND ', $w);
-				
-			} else $sql .= $where;
-		}
+		if($where) $sql .= $this->whereHelper($where, $parameters);
 		$result = $this->execute($sql, $parameters);
 		return $this->affectedRows($result);
 	}
@@ -142,7 +128,7 @@ abstract class dbFacile {
 	 * */
 	public function fetchAll($sql, $parameters = array()) {
 		$result = $this->execute($sql, $parameters, false);
-		if ($result)
+		if($result)
 			return $this->_fetchAll($result);
 		return array();
 	}
@@ -152,7 +138,7 @@ abstract class dbFacile {
 	 * */
 	public function fetchCell($sql, $parameters = array()) {
 		$result = $this->execute($sql, $parameters);
-		if ($result) {
+		if($result) {
 			return array_shift($this->_fetchRow($result)); // shift first field off first row
 		}
 		return null;
@@ -211,6 +197,8 @@ abstract class dbFacile {
 	}
 
 
+	// These are defaults, since these statements are common across a few DBMSes
+	// Override in driver class if they are incorrect
 	public function beginTransaction() {
 		// need to return true or false
 		$this->_query('begin');
@@ -246,25 +234,6 @@ abstract class dbFacile {
 		//var_dump($query);exit;
 		return $query;
 	}
-	
-	/*
-	 * This should be protected and overloadable by driver classes
-	 */
-	private function prepareData($data) {
-		$values = array();
-
-		foreach($data as $key=>$value) {
-			// it's not right to worry about invalid fields in this method because we may be operating on fields
-			// that are aliases, or part of other tables through joins 
-			//if(!in_array($key, $columns)) // skip invalid fields
-			//	continue;
-			if($this->addQuotes)
-				$values[$key] = "'" . $this->_escapeString($value) . "'";
-			else
-				$values[$key] = $this->_escapeString($value);
-		}
-		return $values;
-	}
 
 	public function quoteField($field) {
 		return '`' . $field . '`';
@@ -272,6 +241,23 @@ abstract class dbFacile {
 
 	public function quoteFields($fields) {
 		return array_map(array($this, 'quoteField'), $fields);
+	}
+
+	protected function whereHelper(&$where, &$parameters) {
+		// make sure it's a string
+		$sql = ' WHERE ';
+		if(is_array($where)) {
+			$w = array();
+			foreach($where as $key => $value) {
+				$w[] = $this->quoteField($key) . '=?'; 
+				$parameters[] = $value;
+			}
+			$sql .= implode(' AND ', $w);
+			
+		} elseif(is_string($where)) {
+			$sql .= $where;
+		}
+		return $sql;
 	}
 }
 
