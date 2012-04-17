@@ -5,6 +5,7 @@ Copyright (C) 2007-2008 Alan Szlosek
 
 FUTURE ITEMS AND IDEAS
 
+- experiment with unbuffered queries for fetchAll, and return the result (less data duplication and copying)
 - important (got a comment about this): quote all table and field references in single-quotes or backticks, whichever is appropriate for connected DB
 - fix the workaround for when you don't want fields escaped or quoted (insert/update)
 - table prefix to prepend to all tables (except for hand-typed queries)? might be too much work

@@ -109,9 +109,18 @@ abstract class dbFacile {
 	}
 
 	public function delete($table, $where = null, $parameters = array()) {
-		$sql = 'delete from ' . $table;
+		$sql = 'DELETE FROM ' . $table;
 		if($where) {
-			$sql .= ' where ' . $where;
+			$sql .= ' WHERE ';
+			if (is_array($where)) {
+				$parameters = array_values($where);
+				$w = array();
+				foreach (array_keys($where) as $a) {
+					$w[] = $this->quoteField($a) . '=?'; 
+				}
+				$sql .= implode(' AND ', $w);
+				
+			} else $sql .= $where;
 		}
 		$result = $this->execute($sql, $parameters);
 		return $this->affectedRows($result);
