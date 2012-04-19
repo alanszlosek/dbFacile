@@ -24,7 +24,7 @@ II. Usage
 		$db = new dbFacile_TYPE(DATABASE_NAME, USERNAME, PASSWORD, HOSTNAME);
 		
 		Valid TYPEs are: mysql, postgresql, sqlite3.
-		Unfinished: mssql, sqlite2
+		Unfinished: mssql, sqlite2 (seems to be phased out, at least in ubuntu)
 		
 		When using sqlite3, the open method only needs the file path to the database file.
 		
