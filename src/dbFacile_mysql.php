@@ -27,17 +27,17 @@ class dbFacile_mysql extends dbFacile {
 	}
 
 	public function open($database, $user, $password, $host='localhost', $charset='utf-8') {
-                $this->database = $database;
-                // force opening a new link because we might be selecting a different database
-                $this->connection = mysql_connect($host, $user, $password, true);
-                if($this->connection) {
+		$this->database = $database;
+		// force opening a new link because we might be selecting a different database
+		$this->connection = mysql_connect($host, $user, $password, true);
+		if($this->connection) {
 			mysql_select_db($database, $this->connection);
 			if ($charset)
 				mysql_set_charset($charset, $this->connection);
 		}
 		//$this->buildSchema();
-                return $this->connection;
-        }
+		return $this->connection;
+    }
 
 	public function rewind($result) {
 	}
