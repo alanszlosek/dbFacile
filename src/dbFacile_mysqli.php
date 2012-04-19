@@ -2,7 +2,7 @@
 require_once('dbFacile.php');
 
 class dbFacile_mysqli extends dbFacile {
-	public function affectedRows() {
+	public function affectedRows($result = null) {
 		return mysql_affected_rows($this->connection);
 	}
 
@@ -27,9 +27,6 @@ class dbFacile_mysqli extends dbFacile {
 		return mysqli_error($this->connection);
 	}
 
-	public function lastID() {
-		return mysql_insert_id($this->connection);
-	}
 	public function escapeString($string) {
 		return mysqli_real_escape_string($string);
 	}

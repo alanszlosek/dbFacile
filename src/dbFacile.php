@@ -10,13 +10,13 @@ abstract class dbFacile {
 	protected $logFile;
 
 	// implement these methods to create driver subclass
-	public abstract function affectedRows();
+	public abstract function affectedRows($result = null);
 	//public function beginTransaction();
 	public abstract function close();
 	//public function commitTransaction();
 	public abstract function error();
 	public abstract function escapeString($string);
-	public abstract function lastID();
+	public abstract function lastID($table = null);
 	public abstract function numberRows($result);
 	//public abstract function open();
 	//public function quoteField($field);
@@ -75,7 +75,7 @@ abstract class dbFacile {
 		$result = $this->execute($sql, $data);
 		if(!$result) return false;
 
-		return $this->lastID($result);
+		return $this->lastID($table);
 	}
 
 	/*

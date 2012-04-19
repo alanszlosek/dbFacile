@@ -21,10 +21,6 @@ class dbFacile_postgresql extends dbFacile {
 		return pg_escape_string($string);
 	}
 
-	public function escapeString($string) {
-		return mysql_real_escape_string($string);
-	}
-
 	public function lastID($table) {
 		$sequence = $this->fetchCell("SELECT relname FROM pg_class WHERE relkind = 'S' AND relname LIKE '" . $table . "_%'");
 		if(strlen($sequence))

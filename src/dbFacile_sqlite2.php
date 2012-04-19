@@ -21,7 +21,7 @@ require_once('dbFacile.php');
  * */
 
 class dbFacile_sqlite2 extends dbFacile {
-	public function affectedRows() {
+	public function affectedRows($result) {
 		return sqlite_changes($this->connection);
 	}
 
@@ -45,7 +45,7 @@ class dbFacile_sqlite2 extends dbFacile {
 		return sqlite_escape_string($string);
 	}
 
-	public function lastID() {
+	public function lastID($table = null) {
 		return sqlite_last_insert_rowid($this->connection);
 	}
 
