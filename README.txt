@@ -7,6 +7,8 @@ README
 
 I've changed quite a bit in April 2012 ... so I need to give more information about placeholders and some delete() changes.
 
+Working (passing tests) support for the following DBMS: MySQL, Sqlite3, Postgresql.
+
 I. Installation
 
 	1. Copy dbFacile.php and the appropriate driver file to a location in your document root
@@ -21,8 +23,8 @@ II. Usage
 
 		$db = new dbFacile_mysql(DATABASE_NAME, USERNAME, PASSWORD, HOSTNAME);
 		
-		Valid TYPEs are: mysql, sqlite2, sqlite3.
-		In the future we'll also have: mssql, postgresql
+		Valid TYPEs are: mysql, postgresql, sqlite3.
+		In the future we'll also have: mssql, sqlite2
 		
 		When using SQLite, the open method only needs the file path to the database file.
 		
