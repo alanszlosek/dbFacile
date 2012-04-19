@@ -21,12 +21,12 @@ II. Usage
 
 	A. Instantiation
 
-		$db = new dbFacile_mysql(DATABASE_NAME, USERNAME, PASSWORD, HOSTNAME);
+		$db = new dbFacile_TYPE(DATABASE_NAME, USERNAME, PASSWORD, HOSTNAME);
 		
 		Valid TYPEs are: mysql, postgresql, sqlite3.
-		In the future we'll also have: mssql, sqlite2
+		Unfinished: mssql, sqlite2
 		
-		When using SQLite, the open method only needs the file path to the database file.
+		When using sqlite3, the open method only needs the file path to the database file.
 		
 		If you've already established a Database connection and still want to make use of dbFacile, you're in luck. Simple pass a handle to the current connection into the constructor.
 		For mysql, you can also do the following because an empty call to mysql_connect() returns the current connection resource.
