@@ -33,10 +33,15 @@ class dbFacile_postgresql extends dbFacile {
 	}
 
 	// user, password, database, host
-	public function open($database, $user, $password, $host) {
+	public function open($database, $user, $password, $host = 'localhost') {
 		//die("host=$host dbname=$database user=$user");
-		$this->connection = pg_connect("host=$host dbname=$database port=5432 user=$user password=$password");
+		$this->connection = pg_connect("host=$host port=5432 dbname=$database user=$user password=$password");
 		return $this->connection;
+	}
+
+	// Backticks don't work for Postgresql
+	public function quoteField($field) {
+		return $field;
 	}
 
 	public function rewind($result) {
@@ -48,7 +53,6 @@ class dbFacile_postgresql extends dbFacile {
 	}
 
 	protected function _fetchAll($result) {
-		return $data;
 		$data = array();
 		while($row = pg_fetch_assoc($result)) {
 			$data[] = $row;
@@ -63,8 +67,6 @@ class dbFacile_postgresql extends dbFacile {
 	}
 
 	protected function _query($sql) {
-		// postgres has it's own param filling?
-		$sql = $this->makeQuery($sql, $parameters);
 		return pg_query($this->connection, $sql);
 	}
 } // postgresql

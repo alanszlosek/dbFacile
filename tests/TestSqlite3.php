@@ -128,7 +128,7 @@ class TestSqlite3 extends PHPUnit_Framework_TestCase {
 		$db = $this->db;
 		$data = array('c' => 'new');
 		$db->delete('test', $data);
-		$row = $db->fetchRow('select b,c from test where b=?', array('new'));
+		$row = $db->fetchRow('select b,c from test where c=?', array('new'));
 		$this->assertEquals(false, $row);
 	}
 }
