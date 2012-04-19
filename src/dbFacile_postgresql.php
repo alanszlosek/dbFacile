@@ -2,7 +2,7 @@
 require_once('dbFacile.php');
 
 class dbFacile_postgresql extends dbFacile {
-	public function affectedRows($result) {
+	public function affectedRows($result = null) {
 		return pg_affected_rows($result);
 	}
 	
