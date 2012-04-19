@@ -31,7 +31,7 @@ class dbFacile_mysqli extends dbFacile {
 		return mysqli_real_escape_string($string);
 	}
 
-	public function lastID() {
+	public function lastID($table = null) {
 		return mysqli_insert_id($this->connection);
 	}
 

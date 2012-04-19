@@ -21,7 +21,7 @@ require_once('dbFacile.php');
  * */
 
 class dbFacile_sqlite2 extends dbFacile {
-	public function affectedRows($result) {
+	public function affectedRows($result = null) {
 		return sqlite_changes($this->connection);
 	}
 
