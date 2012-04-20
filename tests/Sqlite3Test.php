@@ -5,7 +5,7 @@ include_once('../src/dbFacile_sqlite3.php');
 Would really like for tests to assert format of constructed SQL queries given varied base SQL and parameter arrays
 */
 
-class TestSqlite3 extends PHPUnit_Framework_TestCase {
+class Sqlite3Test extends PHPUnit_Framework_TestCase {
 	protected $db;
 
 	protected $rows1 = array(

@@ -1,8 +1,8 @@
 <?php
 require_once('../src/dbFacile_postgresql.php');
-require_once('TestSqlite3.php');
+require_once('Sqlite3Test.php');
 
-class TestPostgresql extends TestSqlite3 {
+class PostgresqlTest extends Sqlite3Test {
 
 	public static function setUpBeforeClass() {
                 $db = new dbFacile_postgresql();
