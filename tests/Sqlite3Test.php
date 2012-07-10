@@ -55,7 +55,7 @@ class Sqlite3Test extends PHPUnit_Framework_TestCase {
 
 	public function testFetchAll() {
 		$db = $this->db;
-		$rows = $db->fetchAll('select * from test order by b');
+		$rows = $db->fetchRows('select * from test order by b');
 		foreach($rows as $i => $row) {
 			$this->assertEquals( $this->rows1[ $i ], $row);
 		}
@@ -63,7 +63,7 @@ class Sqlite3Test extends PHPUnit_Framework_TestCase {
 
 	public function testPlaceholders() {
 		$db = $this->db;
-		$rows = $db->fetchAll('select * from test where b > ? order by b', array('1'));
+		$rows = $db->fetchRows('select * from test where b > ? order by b', array('1'));
 		foreach($rows as $i => $row) {
 			$this->assertEquals( $this->rows1[ $i+1 ], $row);
 		}
