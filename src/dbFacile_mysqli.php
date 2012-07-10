@@ -3,7 +3,7 @@ require_once('dbFacile.php');
 
 class dbFacile_mysqli extends dbFacile {
 	public function affectedRows($result = null) {
-		return mysql_affected_rows($this->connection);
+		return mysqli_affected_rows($this->connection);
 	}
 
 	public function beginTransaction() {
@@ -20,15 +20,11 @@ class dbFacile_mysqli extends dbFacile {
 	}
 
 	public function escapeString($string) {
-		return mysql_real_escape_string($string);
+		return mysqli_real_escape_string($string);
 	}
 
 	public function lastError() {
 		return mysqli_error($this->connection);
-	}
-
-	public function escapeString($string) {
-		return mysqli_real_escape_string($string);
 	}
 
 	public function lastID($table = null) {
