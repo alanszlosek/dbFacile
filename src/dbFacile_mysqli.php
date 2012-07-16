@@ -3,34 +3,36 @@ require_once('dbFacile.php');
 
 class dbFacile_mysqli extends dbFacile {
 	public function affectedRows($result = null) {
-		return mysqli_affected_rows($this->connection);
+		return $resultthis->connection->affected_rows;
 	}
 
 	public function beginTransaction() {
-		mysqli_autocommit($this->connection, false);
+		$this->connection->autocommit(false);
 	}
 
 	public function close() {
-		mysqli_close($this->connection);
+		$this->connection->close();
 	}
 
 	public function commitTransaction() {
-		mysqli_commit($this->connection);
-		mysqli_autocommit($this->connection, true);
+		$this->connection->commit();
+		// Turn auto-commit back on
+		$this->connection->autocommit(true);
 	}
 
 	public function escapeString($string) {
-		return mysqli_real_escape_string($string);
+		return $this->connection->real_escape_string($string);
 	}
 
 	public function lastError() {
-		return mysqli_error($this->connection);
+		return $this->connection->error;
 	}
 
 	public function lastID($table = null) {
-		return mysqli_insert_id($this->connection);
+		return $this->connection->insert_id;
 	}
 
+	// Hmm
 	public function numberRows($result) {
 		if(mysqli_affected_rows($this->connection)) { // for insert, update, delete
 			$this->numberRecords = mysqli_affected_rows($this->connection);
@@ -43,16 +45,17 @@ class dbFacile_mysqli extends dbFacile {
 
 	public function open($database, $user, $password, $host='localhost', $charset='utf-8') {
                 // force opening a new link because we might be selecting a different database
-                $this->connection = mysqli_connect($host, $user, $password, $database);
+                $this->connection = new mysqli($host, $user, $password, $database);
                 return $this->connection;
         }
 
 	public function rewind($result) {
+		$result->data_seek(0);
 	}
 
 	public function rollbackTransaction() {
-		mysqli_rollback($this->connection);
-		mysqli_autocommit($this->connection, true);
+		$this->connection->rollback();
+		$this->connection->autocommit(true);
 	}
 
 
@@ -62,16 +65,16 @@ class dbFacile_mysqli extends dbFacile {
 	protected function _fetchAll($result) {
 		$data = array();
 		for($i = 0; $i < $this->numberRecords($result); $i++) {
-			$data[] = mysqli_fetch_assoc($result);
+			$data[] = $result->fetch_assoc();
 		}
-		mysqli_free_result($result);
+		$result->free();
 		return $data;
 	}
 	protected function _fetchRow($result) {
-		return mysqli_fetch_assoc($result);
+		return $result->fetch_assoc();
 	}
 	protected function _query($query) {
-		return mysqli_query($this->connection, $query);
+		return $this->connection->query($query);
 	}
 } // mysqli
 
