@@ -1,4 +1,5 @@
 <?php
+date_default_timezone_set('America/Los_Angeles');
 include_once('../src/dbFacile_sqlite3.php');
 
 /*
@@ -97,6 +98,7 @@ class Sqlite3Test extends PHPUnit_Framework_TestCase {
 		$this->assertEquals($row, $data);
 	}
 
+	// Update non-existent row?
 	public function testUpdate() {
 		$db = $this->db;
 		$data = array('c' => date('Y-m-d H:i:s'));
