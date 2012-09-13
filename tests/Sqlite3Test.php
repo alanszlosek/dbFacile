@@ -22,6 +22,7 @@ class Sqlite3Test extends PHPUnit_Framework_TestCase {
                 $db = new dbFacile_sqlite3();
 		$db->open('sqlite3.db');
 		$db->execute('create table test (b integer primary key autoincrement, c text)');
+		$db->execute('create table test2 (b integer primary key, c text)');
 	}
 
         protected function setUp() {
@@ -52,6 +53,19 @@ class Sqlite3Test extends PHPUnit_Framework_TestCase {
 		unset($row['b']);
 		$a = $db->insert($row, 'test');
 		$this->assertEquals($a, 3);
+	}
+
+	public function testInsertNoKey() {
+		$db = $this->db;
+		$row = array(
+			'b' => 123,
+			'c' => 'testing'
+		);
+		$a = $db->insert($row, 'test2');
+		$this->assertEquals(true, $a);
+
+		$row2 = $db->fetchRow('select * from test2 where b=?', array(123));
+		$this->assertEquals($row, $row2);
 	}
 
 	public function testFetchAll() {

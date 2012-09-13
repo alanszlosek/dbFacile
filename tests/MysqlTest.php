@@ -8,7 +8,9 @@ class MysqlTest extends Sqlite3Test {
                 $db = new dbFacile_mysql();
 		$db->open('dbFacile', 'dbfacile', 'dbfacile');
 		$db->execute('drop table if exists test');
+		$db->execute('drop table if exists test2');
 		$db->execute('create table test (b int(11) primary key auto_increment, c text)');
+		$db->execute('create table test2 (b int(11) primary key, c text)');
 	}
 
         protected function setUp() {
