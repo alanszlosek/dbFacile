@@ -7,7 +7,7 @@ README
 
 I've changed quite a bit in April 2012 ... so I need to give more information about placeholders and some delete() changes.
 
-Working (passing tests) support for the following DBMS: MySQL, Sqlite3, Postgresql.
+Working (passing tests) support for the following DBMS: MySQL (and MySQLi extension), Sqlite3, Postgresql.
 
 I. Installation
 
@@ -23,7 +23,7 @@ II. Usage
 
 		$db = new dbFacile_TYPE(DATABASE_NAME, USERNAME, PASSWORD, HOSTNAME);
 		
-		Valid TYPEs are: mysql, postgresql, sqlite3.
+		Valid TYPEs are: mysql, mysqli, postgresql, sqlite3.
 		Unfinished: mssql, sqlite2 (seems to be phased out, at least in ubuntu)
 		
 		When using sqlite3, the open method only needs the file path to the database file.
