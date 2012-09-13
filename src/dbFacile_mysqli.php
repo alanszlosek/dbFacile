@@ -3,7 +3,7 @@ require_once('dbFacile.php');
 
 class dbFacile_mysqli extends dbFacile {
 	public function affectedRows($result = null) {
-		return $resultthis->connection->affected_rows;
+		return $this->connection->affected_rows;
 	}
 
 	public function beginTransaction() {
@@ -18,6 +18,10 @@ class dbFacile_mysqli extends dbFacile {
 		$this->connection->commit();
 		// Turn auto-commit back on
 		$this->connection->autocommit(true);
+	}
+
+	public function error() {
+		return $this->connection->error;
 	}
 
 	public function escapeString($string) {
@@ -63,10 +67,7 @@ class dbFacile_mysqli extends dbFacile {
 		return $this->_fetchAll($result);
 	}
 	protected function _fetchAll($result) {
-		$data = array();
-		for($i = 0; $i < $this->numberRecords($result); $i++) {
-			$data[] = $result->fetch_assoc();
-		}
+		$data = $result->fetch_all(MYSQLI_ASSOC);
 		$result->free();
 		return $data;
 	}
