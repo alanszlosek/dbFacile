@@ -9,6 +9,8 @@ Working (passing tests) support for the following DBMS: MySQL (and MySQLi extens
 
 Question mark (?) and pound (#) placeholders. Parameters associated with question marks get quoted and escaped. Those associated with pound signs get inserted as-is, so you can do number literals (unquoted), or SQL function calls.
 
+Note: there's still no way to prevent quoting and escaping of parameters used withing insert() or update() method calls.
+
 I. Installation
 
 	1. Copy dbFacile.php and the appropriate driver file to a location in your document root
