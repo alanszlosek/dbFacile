@@ -64,7 +64,7 @@ class Sqlite3Test extends PHPUnit_Framework_TestCase {
 		$a = $db->insert($row, 'test2');
 		$this->assertEquals(true, $a);
 
-		$row2 = $db->fetchRow('select * from test2 where b=?', array(123));
+		$row2 = $db->fetchRow('select * from test2 where b=#', array(123));
 		$this->assertEquals($row, $row2);
 	}
 
@@ -78,7 +78,7 @@ class Sqlite3Test extends PHPUnit_Framework_TestCase {
 
 	public function testPlaceholders() {
 		$db = $this->db;
-		$rows = $db->fetchRows('select * from test where b > ? order by b', array('1'));
+		$rows = $db->fetchRows('select * from test where b > # order by b', array(1));
 		foreach($rows as $i => $row) {
 			$this->assertEquals( $this->rows1[ $i+1 ], $row);
 		}
@@ -86,7 +86,7 @@ class Sqlite3Test extends PHPUnit_Framework_TestCase {
 
 	public function testAsIsPlaceholders() {
 		$db = $this->db;
-		$rows = $db->fetchRows('select * from test where b > # or b > ? order by b', array(1,1));
+		$rows = $db->fetchRows('select * from test where b > # or b > # order by b', array(1,1));
 		foreach($rows as $i => $row) {
 			$this->assertEquals( $this->rows1[ $i+1 ], $row);
 		}
@@ -94,13 +94,13 @@ class Sqlite3Test extends PHPUnit_Framework_TestCase {
 
 	public function testFetchRow() {
 		$db = $this->db;
-		$row = $db->fetchRow('select * from test where b = ?', array('2'));
+		$row = $db->fetchRow('select * from test where b = #', array(2));
 		$this->assertEquals( $this->rows1[ 1 ], $row);
 	}
 
 	public function testFetchCell() {
 		$db = $this->db;
-		$row = $db->fetchCell('select b,c from test where b = ?', array('3'));
+		$row = $db->fetchCell('select b,c from test where b = #', array(3));
 		$this->assertEquals($row, 3);
 	}
 
