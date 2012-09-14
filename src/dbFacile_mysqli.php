@@ -33,7 +33,10 @@ class dbFacile_mysqli extends dbFacile {
 	}
 
 	public function lastID($table = null) {
-		return $this->connection->insert_id;
+		$id = $this->connection->insert_id;
+		// $id will be 0 if insert succeeded, but statement didn't generate a new id (no auto-increment)
+		if ($id == 0) return false;
+		return $id;
 	}
 
 	// Hmm

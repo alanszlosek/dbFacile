@@ -214,26 +214,28 @@ abstract class dbFacile {
 		$this->_query('rollback');
 	}
 
-
-	// Fill in question mark placeholders. No more named placeholders.
+	// Fill in question mark and pound (#) placeholders. No more named placeholders.
 	protected function makeQuery($sql, $parameters) {
 		// bypass extra logic if we have no parameters
-		if(sizeof($parameters) == 0)
+		if(sizeof($parameters) == 0) {
 			return $sql;
-		
-		$parts = explode('?', $sql);
+		}
 
-		// sizeof($sql) == sizeof($paramters) - 1
-		//var_dump($parts);var_dump($parameters);exit;
-		
+		$parts = explode('?', $sql);
 		$query = '';
 		while(sizeof($parameters)) {
-			$query .= array_shift($parts);
-			//$query .= $this->escapeString( array_shift($parameters) );
-			$query .= "'" . $this->escapeString( array_shift($parameters) ) . "'";
+			$part = array_shift($parts);
+			// now placeholders for parameters that are to be inserted as-is
+			$asis = explode('#', $part);
+			$query .= array_shift($asis);
+			while (sizeof($asis)) {
+				//$query .= array_shift($asis) . array_shift($parameters);
+				$query .= array_shift($parameters) . array_shift($asis);
+			}
+
+			if ($parameters) $query .= "'" . $this->escapeString( array_shift($parameters) ) . "'";
 		}
 		$query .= array_shift($parts);
-		//var_dump($query);exit;
 		return $query;
 	}
 

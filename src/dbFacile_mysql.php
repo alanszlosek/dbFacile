@@ -21,7 +21,7 @@ class dbFacile_mysql extends dbFacile {
 	public function lastID($table = null) {
 		$id = mysql_insert_id($this->connection);
 		// $id will be 0 if insert succeeded, but statement didn't generate a new id (no auto-increment)
-		if ($id == 0) return true;
+		if ($id == 0) return false;
 		return $id;
 	}
 
