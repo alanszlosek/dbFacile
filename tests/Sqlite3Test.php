@@ -84,6 +84,14 @@ class Sqlite3Test extends PHPUnit_Framework_TestCase {
 		}
 	}
 
+	public function testAsIsPlaceholders() {
+		$db = $this->db;
+		$rows = $db->fetchRows('select * from test where b > # or b > ? order by b', array(1,1));
+		foreach($rows as $i => $row) {
+			$this->assertEquals( $this->rows1[ $i+1 ], $row);
+		}
+	}
+
 	public function testFetchRow() {
 		$db = $this->db;
 		$row = $db->fetchRow('select * from test where b = ?', array('2'));

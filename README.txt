@@ -5,15 +5,15 @@ Copyright (C) 2007-2012 Alan Szlosek
 
 README
 
-I've changed quite a bit in April 2012 ... so I need to give more information about placeholders and some delete() changes.
-
 Working (passing tests) support for the following DBMS: MySQL (and MySQLi extension), Sqlite3, Postgresql.
+
+Question mark (?) and pound (#) placeholders. Parameters associated with question marks get quoted and escaped. Those associated with pound signs get inserted as-is, so you can do number literals (unquoted), or SQL function calls.
 
 I. Installation
 
 	1. Copy dbFacile.php and the appropriate driver file to a location in your document root
 	2. Include dbFacile_DRIVER.php in your PHP script (replace DRIVER with lowercase name of database)
-	3. Create a new instance of the class (like dbFacile_mysql)
+	3. Create a new instance of the class (like dbFacile_mysqli)
 	4. Call open(), passing DB connection parameters
 	5. Use.
 
@@ -46,6 +46,8 @@ II. Usage
 		$row = $db->fetchRow('select * from users') : Performs SQL query and returns one-dimensional associative array of fields and values.
 		
 		$email = $db->fetchCell('select email from users where name=?', array('Alan')) : Replaces ? found in query with a quoted and escaped version of the second paramter, performs SQL query and returns first field from first row in result.
+
+		$email = $db->fetchCell('select email from users where date_created<#', array('unix_timestamp()')) : Replaces # found in query with the matching parameter as-is. So you can do function calls or other literals.
 		
 		$emailAddresses = $db->fetchColumn('select email from users') : Performs SQL and returns the first column as a 1-dimensional array.
 
