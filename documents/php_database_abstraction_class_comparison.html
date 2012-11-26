@@ -1,0 +1,352 @@
+<html>
+<head>
+<title>Comparision of PHP Database Abstraction Classes</title>
+<style>
+td {
+	font-size: 12pt;
+}
+</style>
+</head>
+<body>
+
+<h1>Comparison of PHP Database Abstraction Classes</h1>
+<h2>Simplicity/Usability Comparison</h2>
+
+<p>The main purpose of this is to show that database interaction doesn't have to be convoluted.</p>
+
+<p>The following tables compare the code required to perform incredibly common database operations and queries. Care has been taken to use the least code possible per package per example.</p>
+
+<p>Provided by <a href="http://www.greaterscope.net">greaterscope.net</a>. (Might I also interest you in my <a href="https://github.com/alanszlosek/grrr-orms">PHP ORM experimentations</a>?)</p>
+
+<h3>Connecting to a Database</h3>
+<table cellspacing="0" border="1" width="100%">
+	<tr valign="top">
+		<td width="200"><a href="https://github.com/alanszlosek/dbFacile">dbFacile</a></td>
+		<td>
+			$db = dbFacile::open('mysql', 'dbname', 'user', 'pass', 'hostname');
+		</td>
+	</tr><tr valign="top">
+		<td>Built-in PHP Functions</td>
+		<td>
+			$resource = mysql_connect('hostname', 'user', 'pass');<br />
+			mysql_select_db('dbname', $resource);
+		</td>
+	</tr><tr valign="top">
+		<td><a href="http://www.php.net/manual/en/ref.pdo.php">PDO</a></td>
+		<td>
+			$db = new PDO('mysql:host=localhost;dbname=test', 'user', 'pass');
+		</td>
+	</tr><tr valign="top">
+		<td><a href="http://adodb.sourceforge.net">ADOdb</a> &amp; <a href="http://adodblite.sourceforge.net">ADOdb Lite</a></td>
+		<td>
+			$db = ADONewConnection('mysql');<br />
+			$result = $db->Connect('hostname', 'user', 'pass', 'dbname');
+		</td>
+	</tr><tr valign="top">
+		<td><a href="http://pear.php.net/package/MDB2">Pear MDB2</a></td>
+		<td>$db =&amp; MDB2::factory('mysql://user:pass@hostname/dbname');</td>
+	</tr>
+</table>
+
+<br />
+<h3>Iterate Over Rows</h3>
+<table cellspacing="0" border="1" width="100%">
+	<tr valign="top">
+		<td width="200"><a href="https://github.com/alanszlosek/dbFacile">dbFacile</a></td>
+		<td>
+			foreach($db->fetch('select * from products') as $row) {<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;// ...<br />
+			}
+		</td>
+	</tr><tr valign="top">
+		<td>Built-in PHP Functions</td>
+		<td>
+			$result = mysql_query('select * from products');<br />
+			while(($row = mysql_fetch_assoc($result))) {<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;// ...<br />
+			}
+		</td>
+	</tr><tr valign="top">
+		<td><a href="http://www.php.net/manual/en/ref.pdo.php">PDO</a></td>
+		<td>
+			foreach($db->query('select * from products') as $row) {<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;// ...<br />
+			}
+		</td>
+	</tr><tr valign="top">
+		<td><a href="http://adodb.sourceforge.net">ADOdb</a> &amp; <a href="http://adodblite.sourceforge.net">ADOdb Lite</a></td>
+		<td>
+			$recordSet = $db->Execute("select * from products");<br />
+			foreach ($recordSet as $row) {<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;// ...<br />
+			}
+		</td>
+	</tr><tr valign="top">
+		<td><a href="http://pear.php.net/package/MDB2">Pear MDB2</a></td>
+		<td>
+			$result = $db->query('select * from products');<br />
+			while (($row = $result->fetchRow())) {<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;// ...<br />
+			}
+		</td>
+	</tr>
+</table>
+
+<br />
+<h3>Fetch the First Row</h3>
+<table cellspacing="0" border="1" width="100%">
+	<tr valign="top">
+		<td width="200"><a href="https://github.com/alanszlosek/dbFacile">dbFacile</a></td>
+		<td>$row = $db->fetchRow('select * from products');</td>
+	</tr><tr valign="top">
+		<td>Built-in PHP Functions</td>
+		<td>
+			$result = mysql_query('select * from products');<br />
+			$row = mysql_fetch_assoc($result);
+		</td>
+	</tr><tr valign="top">
+		<td><a href="http://www.php.net/manual/en/ref.pdo.php">PDO</a></td>
+		<td>$statement = $db->prepare('select * from products');<br />$statement->execute();<br />$row = $statement->fetch();</td>
+	</tr><tr valign="top">
+		<td><a href="http://adodb.sourceforge.net">ADOdb</a> &amp; <a href="http://adodblite.sourceforge.net">ADOdb Lite</a></td>
+		<td>$row = $db->GetRow('select * from products');</td>
+	</tr><tr valign="top">
+		<td><a href="http://pear.php.net/package/MDB2">Pear MDB2</a></td>
+		<td>$result = $db->queryRow('select * from products');</td>
+	</tr>
+</table>
+
+<br />
+<h3>Select Single Table Cell from First Record</h3>
+<table cellspacing="0" border="1" width="100%">
+	<tr valign="top">
+		<td width="200"><a href="https://github.com/alanszlosek/dbFacile">dbFacile</a></td>
+		<td>$cell = $db->fetchCell('select name from products');</td>
+	</tr><tr valign="top">
+		<td>Built-in PHP Functions</td>
+		<td>
+			$result = mysql_query('select name from products');<br />
+			$row = mysql_fetch_assoc($result);<br />
+			$cell = $row['name'];
+		</td>
+	</tr><tr valign="top">
+		<td><a href="http://www.php.net/manual/en/ref.pdo.php">PDO</a></td>
+		<td>
+			$stmt = $db->prepare('select name from products');<br />
+			$stmt->execute();<br />
+			$cell = $stmt->fetchColumn();
+		</td>
+	</tr><tr valign="top">
+		<td><a href="http://adodb.sourceforge.net">ADOdb</a> &amp; <a href="http://adodblite.sourceforge.net">ADOdb Lite</a></td>
+		<td>$cell = $db->GetOne('select name from products');</td>
+	</tr><tr valign="top">
+		<td><a href="http://pear.php.net/package/MDB2">Pear MDB2</a></td>
+		<td>$cell = $db->queryCol('select name from products');</td>
+	</tr>
+</table>
+
+<br />
+<h3>Select Column as 1-Dimensional Array</h3>
+<table cellspacing="0" border="1" width="100%">
+	<tr valign="top">
+		<td width="200"><a href="https://github.com/alanszlosek/dbFacile">dbFacile</a></td>
+		<td>$column = $db->fetchColumn('select name from products');</td>
+	</tr><tr valign="top">
+		<td>Built-in PHP Functions</td>
+		<td>$result = mysql_query('select name from products');<br />$column = array();<br />foreach($row = mysql_fetch_assoc($result)) {<br />&nbsp;&nbsp;&nbsp;&nbsp;$column[] = $row['name'];<br />}</td>
+	</tr><tr valign="top">
+		<td><a href="http://www.php.net/manual/en/ref.pdo.php">PDO</a></td>
+		<td>$column = array();<br />foreach($db->query('select name from products') as $row) {<br />&nbsp;&nbsp;&nbsp;&nbsp;$column[] = $row['name'];<br />}</td>
+	</tr><tr valign="top">
+		<td><a href="http://adodb.sourceforge.net">ADOdb</a> &amp; <a href="http://adodblite.sourceforge.net">ADOdb Lite</a></td>
+		<td>$column = array();<br />foreach($db->query('select name from products') as $row) {<br />&nbsp;&nbsp;&nbsp;&nbsp;$column[] = $row['name'];<br />}</td>
+	</tr><tr valign="top">
+		<td><a href="http://pear.php.net/package/MDB2">Pear MDB2</a></td>
+		<td>$rows = $db->queryAll('select name from products');<br />$column = array();<br />foreach($rows as $row) {<br />&nbsp;&nbsp;&nbsp;&nbsp;$column[] = $row['name'];<br />}</td>
+	</tr>
+</table>
+
+<br />
+<h3>Insert and Get Newly Created ID</h3>
+<table cellspacing="0" border="1" width="100%">
+	<tr valign="top">
+		<td width="200"><a href="https://github.com/alanszlosek/dbFacile">dbFacile</a></td>
+		<td>$id = $db->insert(array('name' =&gt; 'Sample'), 'products');</td>
+	</tr><tr valign="top">
+		<td>Built-in PHP Functions</td>
+		<td>
+			$result = mysql_query("insert into products (name) values ('Sample')");<br />
+			$id = mysql_insert_id($result);
+		</td>
+	</tr><tr valign="top">
+		<td><a href="http://www.php.net/manual/en/ref.pdo.php">PDO</a></td>
+		<td>$db->exec("insert into products (name) values ('Sample')");<br />$id = $db->lastInsertId();</td>
+	</tr><tr valign="top">
+		<td><a href="http://adodb.sourceforge.net">ADOdb</a> &amp; <a href="http://adodblite.sourceforge.net">ADOdb Lite</a></td>
+		<td>$db->Execute("insert into products (name) values ('Sample')");<br />$id = $db->Insert_ID();</td>
+	</tr><tr valign="top">
+		<td><a href="http://pear.php.net/package/MDB2">Pear MDB2</a></td>
+		<td>(coming soon)</td>
+	</tr>
+</table>
+
+<br />
+<h3>Update</h3>
+<table cellspacing="0" border="1" width="100%">
+	<tr valign="top">
+		<td width="200"><a href="https://github.com/alanszlosek/dbFacile">dbFacile</a></td>
+		<td>$db->execute("update products set name = 'Sample' where id = 3");</td>
+	</tr><tr valign="top">
+		<td>Built-in PHP Functions</td>
+		<td>$result = mysql_query("update products set name = 'Sample' where id = 3");</td>
+	</tr><tr valign="top">
+		<td><a href="http://www.php.net/manual/en/ref.pdo.php">PDO</a></td>
+		<td>$db->exec("update products set name = 'Sample' where id = 3");</td>
+	</tr><tr valign="top">
+		<td><a href="http://adodb.sourceforge.net">ADOdb</a> &amp; <a href="http://adodblite.sourceforge.net">ADOdb Lite</a></td>
+		<td>$db->Execute("update products set name = 'Sample' where id = 3");</td>
+	</tr><tr valign="top">
+		<td><a href="http://pear.php.net/package/MDB2">Pear MDB2</a></td>
+		<td>$db->query("update products set name = 'Sample' where id = 3");</td>
+	</tr>
+</table>
+
+<br />
+<h3>Query w/SQL Injection Prevention</h3>
+<table cellspacing="0" border="1" width="100%">
+	<tr valign="top">
+		<td width="200"><a href="https://github.com/alanszlosek/dbFacile">dbFacile</a></td>
+		<td>
+			$data = array($_GET['id'], $_GET['category']);<br />
+			$rows = $db->fetch('select * from products where id = ? and category = ?', $data);<br />
+			foreach($rows as $row) {<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;// ...<br />
+			}
+		</td>
+	</tr><tr valign="top">
+		<td>Built-in PHP Functions</td>
+		<td>
+			$id = mysql_real_escape_string($_GET['id']);<br />
+			$category = mysql_real_escape_string($_GET['category']);<br />
+			$sql = "select * from products where id = '" . $id .  "' and category = '" . $category . "'";<br />
+			$result = mysql_query($sql);<br />
+			while(($row = mysql_fetch_assoc($result))) {<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;// ...<br />
+			}
+		</td>
+	</tr><tr valign="top">
+		<td><a href="http://www.php.net/manual/en/ref.pdo.php">PDO</a></td>
+		<td>
+			$statement = $db->prepare('select * from products where id = ? and category = ?');<br />
+			$statement->execute(array($_GET['id'], $_GET['category']));<br />
+			while($statement->fetch() as $row) {<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;// ...<br />
+			}
+		</td>
+	</tr><tr valign="top">
+		<td><a href="http://adodb.sourceforge.net">ADOdb</a> &amp; <a href="http://adodblite.sourceforge.net">ADOdb Lite</a></td>
+		<td>(coming soon)</td>
+	</tr><tr valign="top">
+		<td><a href="http://pear.php.net/package/MDB2">Pear MDB2</a></td>
+		<td>
+			$query = "select * from products where id = '" . $db->quote($_GET['id'], 'integer') . "' and category = '" . $db->quote($_GET['category'], 'integer') . "'";<br />
+			$rows = $db->queryAll($query);<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;// ...<br />
+			}
+		</td>
+	</tr>
+</table>
+	
+<br />
+<h3>Insert w/SQL Injection Prevention</h3>
+<table cellspacing="0" border="1" width="100%">
+	<tr valign="top">
+		<td width="200"><a href="https://github.com/alanszlosek/dbFacile">dbFacile</a></td>
+		<td>
+			$newProductId = $db->insert(array('name' => $_POST['name']), 'products');
+		</td>
+	</tr><tr valign="top">
+		<td>Built-in PHP Functions</td>
+		<td>
+			$name = mysql_real_escape_string($_POST['name']);<br />
+			$sql = "insert into products (name) values('" . $name . "')";<br />
+			$result = mysql_query($sql);<br />
+			$newProductId = mysql_insert_id($result);
+		</td>
+	</tr><tr valign="top">
+		<td><a href="http://www.php.net/manual/en/ref.pdo.php">PDO</a></td>
+		<td>
+			$statement = $db->prepare('insert into products (name) values(:name)');<br />
+			$statement->execute(array('name' => $_POST['name']));<br />
+			$newProductId = $db->lastInsertId();
+		</td>
+	</tr><tr valign="top">
+		<td><a href="http://adodb.sourceforge.net">ADOdb</a> &amp; <a href="http://adodblite.sourceforge.net">ADOdb Lite</a></td>
+		<td>(coming soon)</td>
+	</tr><tr valign="top">
+		<td><a href="http://pear.php.net/package/MDB2">Pear MDB2</a></td>
+		<td>(coming soon)</td>
+	</tr>
+</table>
+
+<br />
+<h3>Update w/SQL Injection Prevention</h3>
+<table cellspacing="0" border="1" width="100%">
+	<tr valign="top">
+		<td width="200"><a href="https://github.com/alanszlosek/dbFacile">dbFacile</a></td>
+		<td>
+			$affectedRows = $db->update(array('name' => $_POST['name']), 'products', 'id=?', array($_POST['id']));
+		</td>
+	</tr><tr valign="top">
+		<td>Built-in PHP Functions</td>
+		<td>
+			$id = mysql_real_escape_string($_POST['id']);<br />
+			$name = mysql_real_escape_string($_POST['name']);<br />
+			$sql = "update products set name='" . $name . "' where id='" . $id . "'";<br />
+			$result = mysql_query($sql);<br />
+			$affectedRows = mysql_affected_rows($result);
+		</td>
+	</tr><tr valign="top">
+		<td><a href="http://www.php.net/manual/en/ref.pdo.php">PDO</a></td>
+		<td>
+			$statement = $db->prepare('update products set name=:name where id=:id');<br />
+			$statement->execute(array('name' => $_POST['name'], 'id' => 123));
+		</td>
+	</tr><tr valign="top">
+		<td><a href="http://adodb.sourceforge.net">ADOdb</a> &amp; <a href="http://adodblite.sourceforge.net">ADOdb Lite</a></td>
+		<td>(coming soon)</td>
+	</tr><tr valign="top">
+		<td><a href="http://pear.php.net/package/MDB2">Pear MDB2</a></td>
+		<td>(coming soon)</td>
+	</tr>
+</table>
+
+<br />
+<h3>Supported Databases</h3>
+<table cellspacing="0" border="1" width="100%">
+	<tr valign="top">
+		<td width="200"><a href="https://github.com/alanszlosek/dbFacile">dbFacile</a></td>
+		<td>Uhh ... MySQL, SQLite2. I've severely slacked in this area.</td>
+	</tr><tr valign="top">
+		<td>Built-in PHP Functions</td>
+		<td>Many...</td>
+	</tr><tr valign="top">
+		<td><a href="http://www.php.net/manual/en/ref.pdo.php">PDO</a></td>
+		<td>MySQL, SQLite2, SQLite3, PostgreSQL, SQL Server, others</td>
+	</tr><tr valign="top">
+		<td><a href="http://adodb.sourceforge.net">ADOdb</a> &amp; <a href="http://adodblite.sourceforge.net">ADOdb Lite</a></td>
+		<td>MySQL, SQLite, PostgreSQL, SQL Server, others</td>
+	</tr><tr valign="top">
+		<td><a href="http://pear.php.net/package/MDB2">Pear MDB2</a></td>
+		<td>MySQL, SQLite, PostgreSQL, SQL Server, others</td>
+	</tr>
+</table>
+
+<script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
+</script>
+<script type="text/javascript">
+_uacct = "UA-3188576-1";
+urchinTracker();
+</script>
+</body>
+</html>
