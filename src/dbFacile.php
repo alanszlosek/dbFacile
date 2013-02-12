@@ -40,6 +40,7 @@ abstract class dbFacile {
 	 * */
 	public function execute($sql, $parameters = array()) {
 		$fullSql = $this->makeQuery($sql, $parameters);
+		//var_dump($fullSql);
 
 		/*
 		if($this->logFile)
@@ -72,7 +73,7 @@ abstract class dbFacile {
 		// Might need to use driver-specific quoteField() instead of this
 		// But only if one of the DBMSes we support doesn't use backticks
 		$fields = array_map( array($this,'quoteField'), array_keys($data) );
-		$sql = 'insert into ' . $table . ' (' . implode(',', $fields) . ') values(?' . str_repeat(',?', sizeof($data)-1) . ')';
+		$sql = 'insert into ' . $this->quoteField($table) . ' (' . implode(',', $fields) . ') values(?' . str_repeat(',?', sizeof($data)-1) . ')';
 		$result = $this->execute($sql, $data);
 		if(!$result) return false;
 		$id = $this->lastID($table);
@@ -87,7 +88,7 @@ abstract class dbFacile {
 	public function update($data, $table, $where = null, $parameters = array()) {
 		// need field name and placeholder value
 		// but how merge these field placeholders with actual $parameters array for the where clause
-		$sql = 'update ' . $table . ' set ';
+		$sql = 'update ' . $this->quoteField($table) . ' set ';
 		// implode no looping
 		foreach($data as $key => $value) {
 			$sql .= $this->quoteField($key) . '=?,';
@@ -104,7 +105,7 @@ abstract class dbFacile {
 	}
 
 	public function delete($table, $where = null, $parameters = array()) {
-		$sql = 'DELETE FROM ' . $table;
+		$sql = 'DELETE FROM ' . $this->quoteField($table);
 		if($where) $sql .= $this->whereHelper($where, $parameters);
 		$result = $this->execute($sql, $parameters);
 		return $this->affectedRows($result);
