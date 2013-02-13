@@ -68,9 +68,9 @@ class dbFacile_mysql extends dbFacile {
 	// user, password, database, host
 
 	protected function _query($sql, $buffered = true) {
-		if ($buffered)
+		if ($buffered) {
 			return mysql_query($sql, $this->connection);
-		else {
+		}else {
 			return mysql_unbuffered_query($sql, $this->connection);
 		}
 	}

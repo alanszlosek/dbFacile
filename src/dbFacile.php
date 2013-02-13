@@ -137,12 +137,14 @@ abstract class dbFacile {
 	}
 
 	/*
-	 * Fetches the first call from the first row returned by the query
+	 * Fetches the first cell from the first row returned by the query
 	 * */
 	public function fetchCell($sql, $parameters = array()) {
 		$result = $this->execute($sql, $parameters);
 		if($result) {
-			return array_shift($this->_fetchRow($result)); // shift first field off first row
+			$row = $this->_fetchRow($result);
+			if (!$row) return null;
+			return array_shift($row); // shift first field off first row
 		}
 		return null;
 	}
