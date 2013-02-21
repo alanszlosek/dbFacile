@@ -73,7 +73,12 @@ abstract class dbFacile {
 		// Might need to use driver-specific quoteField() instead of this
 		// But only if one of the DBMSes we support doesn't use backticks
 		$fields = array_map( array($this,'quoteField'), array_keys($data) );
-		$sql = 'insert into ' . $this->quoteField($table) . ' (' . implode(',', $fields) . ') values(?' . str_repeat(',?', sizeof($data)-1) . ')';
+		//$sql = 'insert into ' . $this->quoteField($table) . ' (' . implode(',', $fields) . ') values(?' . str_repeat(',?', sizeof($data)-1) . ')';
+		$sz = sizeof($data);
+		if ($sz) $q = array_fill(0, $sz, '?');
+		else $q = array();
+		
+		$sql = 'insert into ' . $this->quoteField($table) . ' (' . implode(',', $fields) . ') values(' . implode(',', $q) . ')';
 		$result = $this->execute($sql, $data);
 		if(!$result) return false;
 		$id = $this->lastID($table);
