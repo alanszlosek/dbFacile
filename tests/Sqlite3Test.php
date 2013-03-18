@@ -68,6 +68,9 @@ class Sqlite3Test extends PHPUnit_Framework_TestCase {
 		$this->assertEquals($row, $row2);
 	}
 
+	public function testInsertEmpty() {
+	}
+
 	public function testFetchAll() {
 		$db = $this->db;
 		$rows = $db->fetchRows('select * from test order by b');
@@ -151,7 +154,8 @@ class Sqlite3Test extends PHPUnit_Framework_TestCase {
 	public function testDeleteWhereArray() {
 		$db = $this->db;
 		$data = array('c' => 'new');
-		$db->delete('test', $data);
+		$ret = $db->delete('test', $data);
+		$this->assertEquals(1, $ret);
 		$row = $db->fetchRow('select b,c from test where c=?', array('new'));
 		$this->assertEquals(false, $row);
 	}
