@@ -9,6 +9,7 @@ abstract class dbFacile {
 	protected $connection; // handle to Database connection
 	protected $logFile;
 	protected $fullSQL; // holds previously executed SQL statement
+	protected $_queryCount = 0;
 
 	// implement these methods to create driver subclass
 	public abstract function affectedRows($result = null);
@@ -48,6 +49,7 @@ abstract class dbFacile {
 		*/
 
 		$result = $this->_query($this->fullSQL); // sets $this->result
+		$this->_queryCount++;
 
 		/*
 		if($this->logFile) {
@@ -65,8 +67,11 @@ abstract class dbFacile {
 		return $result;
 	}
 
-	public function previousStatement() {
+	public function previousQuery() {
 		return $this->fullSQL;
+	}
+	public function queryCount() {
+		return $this->_queryCount;
 	}
 
 	/*
