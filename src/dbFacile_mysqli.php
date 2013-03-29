@@ -51,9 +51,16 @@ class dbFacile_mysqli extends dbFacile {
 	}
 
 	public function open($database, $user, $password, $host='localhost', $charset='utf-8') {
-                // force opening a new link because we might be selecting a different database
-                $this->connection = new mysqli($host, $user, $password, $database);
-                return $this->connection;
+		// force opening a new link because we might be selecting a different database
+		$mysqli = new mysqli($host, $user, $password, $database);
+		if ($mysqli->connect_error) {
+			throw new Exception('Connect Error (' . $mysqli->connect_errno . ') ' . $mysqli->connect_error);
+		}
+		if ($charset) {
+			$mysqli->set_charset( $charset );
+		}
+		$this->connection = $mysqli;
+		return $this->connection;
         }
 
 	public function rewind($result) {
@@ -70,6 +77,7 @@ class dbFacile_mysqli extends dbFacile {
 		return $this->_fetchAll($result);
 	}
 	protected function _fetchAll($result) {
+		// this isn't available unless the mysql native driver is being used ... hmm
 		$data = $result->fetch_all(MYSQLI_ASSOC);
 		$result->free();
 		return $data;
