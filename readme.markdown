@@ -74,19 +74,28 @@ Inserts associative array of data into table, returns newly generated primary ke
 Returns false if the insertion failed.
 Returns 0 if no key was generated.
 
-    $id = $db->insert(array('name' => 'Aiden', 'email' => 'aiden@gmail.com'), 'users');
+    $data = array('name' => 'Aiden', 'email' => 'aiden@gmail.com');
+    $id = $db->insert($data, 'users');
 
 
 Updates rows, setting name to 'Aideen' where name was 'Aiden'
 
-    $db->update( array('name' => 'Aideen'), 'users', 'name="Aiden"');
+    $data = array('name' => 'Aideen');
+    $db->update($data, 'users', 'name="Aiden"');
 
-Note: As used above, all values present in the associative array will be escaped and quoted for use in the update query.
+You can also pass an associative array as the where clause:
 
-The update() method can also take additional parameters that act as a where clause. Here are some examples:
+    $data = array('name' => 'Aideen');
+    $where = array('name' => 'Aiden');
+    $db->update($data, 'users', $where);
 
-    $db->update( array('name' => 'John'), 'users', 'id=3');
-    $db->update( array('name' => 'John'), 'users', 'id=? and email=?', array(3, 'a@g.com'));
+Note: As used above, all values present in the associative arrays will be escaped and quoted.
+
+If you need more control over your where clause, use a combination of a string and parameters:
+
+    $data = array('name' => 'John');
+    // SQL will be "update users set name='John' where id>=3 and email='a@g.com'"
+    $db->update($data, 'users', 'id>=# and email=?', array(3, 'a@g.com'));
 
 Transactions
 ----
