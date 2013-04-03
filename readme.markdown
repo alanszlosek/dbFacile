@@ -1,5 +1,4 @@
-dbFacile
-Trying to make a more helpful PHP Database Abstraction Class
+dbFacile - Trying to make a more helpful PHP Database Abstraction Class
 
 Introduction
 ====
@@ -7,7 +6,7 @@ Introduction
 Features:
 
 * Support for MySQL, MySQLi, Sqlite3, Postgresql
-* Query placeholders: ? and #. Values associated with the former are quoted and escaped. Those associated with the latter are inserted as-is. With those you can have unquoted number and SQL functions in your queries.
+* Query placeholders: ? and #. Values associated with the former are quoted and escaped. Those associated with the latter are inserted as-is, for unquoted numbers and SQL functions in your queries.
 
 Note: there's still no way to prevent quoting and escaping of parameters used withing insert() or update() method calls.
 
@@ -21,10 +20,11 @@ Setup and Installation
 Usage
 ====
 
-Example
+Connection Example
 ----
 
-    // Connect using MySQLi module, and a persistent connection
+Connect using MySQLi module, and a persistent connection
+
     $db = new dbFacile_mysqli();
     $db->open('testDB', 'testUser', 'testPass', 'p:192.168.1.15');
 		
@@ -63,7 +63,7 @@ Returns a one-dimensional, numerically-indexed array of column values. Empty arr
 
 Returns an associative array with users.id as the key and users.email as the value for each. Specify more than 2 fields and the key points to a numerically-indexed array of the remaining field values
 
-    $keyValue = $db->fetchKeyValue('select id,email from users');
+    $idToEmail = $db->fetchKeyValue('select id,email from users');
 
 Inserting and Updating Data
 ----
