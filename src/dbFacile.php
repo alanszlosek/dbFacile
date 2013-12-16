@@ -35,6 +35,19 @@ abstract class dbFacile {
 	public function __construct($handle = null) {
 		$this->connection = $handle;
 	}
+	
+	/**
+	 * TODO: Recommend and enforce use of these methods
+	 * Factory-ish static methods for instantiating driver-specific subclasses
+	 */
+	public static function mysqli() {
+		if (method_exists('mysqli_result', 'fetch_all')) {
+			$o = new dbFacile_mysqli();
+		} else {
+			$o = new dbFacile_mysqli2();
+		}
+		return $o;
+	}
 
 	/*
 	 * Performs a query using the given string.

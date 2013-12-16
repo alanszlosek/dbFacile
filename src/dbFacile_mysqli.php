@@ -61,7 +61,7 @@ class dbFacile_mysqli extends dbFacile {
 		}
 		$this->connection = $mysqli;
 		return $this->connection;
-        }
+	}
 
 	public function rewind($result) {
 		$result->data_seek(0);

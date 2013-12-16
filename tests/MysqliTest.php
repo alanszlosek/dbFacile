@@ -5,7 +5,7 @@ require('Sqlite3Test.php');
 class MysqliTest extends Sqlite3Test {
 
 	public static function setUpBeforeClass() {
-                $db = new dbFacile_mysqli();
+		$db = dbFacile::mysqli();
 		$db->open('dbFacile', 'dbfacile', 'dbfacile');
 		$db->execute('drop table if exists test');
 		$db->execute('drop table if exists test2');
@@ -14,7 +14,7 @@ class MysqliTest extends Sqlite3Test {
 	}
 
         protected function setUp() {
-                $db = new dbFacile_mysqli();
+		$db = new dbFacile_mysqli();
 		$db->open('dbFacile', 'dbfacile', 'dbfacile');
 		$this->db = $db;
 	}
