@@ -1,3 +1,8 @@
+2012-04-28
+
+Intresting, SQLite returns a very helpful error if insert would cause key uniqueness violation:
+	SQLite3::query(): Unable to execute statement: column name is not unique
+
 2009-01-26
 
 Rolled a simpler (non-OOP) version of dbFacile for use at Qgiv. I'd like to include that work in the actual dbFacile package.
