@@ -78,7 +78,17 @@ class dbFacile_mysqli extends dbFacile {
 	}
 	protected function _fetchAll($result) {
 		// this isn't available unless the mysql native driver is being used ... hmm
-		$data = $result->fetch_all(MYSQLI_ASSOC);
+//		$data = $result->fetch_all(MYSQLI_ASSOC);
+
+		if (method_exists('mysqli_result', 'fetch_all')) {
+			// Compatibility layer with PHP < 5.3
+			$data = $result->fetch_all(MYSQLI_ASSOC);
+		} else {
+			for ($data = array(); $tmp = $result->fetch_array(MYSQLI_ASSOC);) {
+				$data[] = $tmp;
+			}
+		}
+		
 		$result->free();
 		return $data;
 	}
