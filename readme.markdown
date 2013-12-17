@@ -13,7 +13,7 @@ Note: there's still no way to prevent quoting and escaping of parameters used wi
 Setup and Installation
 ====
 
-This was updated on Dec 16, 2013. We now use something resembling the factory pattern for instantiating the correct dbFacile driver subclass. There was an issue where certain versions of the mysqli driver were missing a method; using a factory allows us to elegantly work around this.
+This was updated on Dec 16, 2013. We now use something resembling the factory pattern for instantiating the correct dbFacile driver subclass. There was an issue where certain versions of the mysqli driver were missing a method; using a factory allows us to elegantly work around this. More info: https://github.com/alanszlosek/dbFacile/pull/8
 
 1. Include the appropriate dbFacile.php
 2. Get an instance of the correct driver class: $db = dbFacile::mysqli()
