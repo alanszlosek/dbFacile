@@ -1,5 +1,5 @@
 <?php
-require_once('../src/dbFacile_mysqli.php');
+require_once('../src/dbFacile.php');
 require('Sqlite3Test.php');
 
 class MysqliTest extends Sqlite3Test {
@@ -13,8 +13,8 @@ class MysqliTest extends Sqlite3Test {
 		$db->execute('create table test2 (b int(11) primary key, c text)');
 	}
 
-        protected function setUp() {
-		$db = new dbFacile_mysqli();
+	protected function setUp() {
+		$db = dbFacile::mysqli();
 		$db->open('dbFacile', 'dbfacile', 'dbfacile');
 		$this->db = $db;
 	}

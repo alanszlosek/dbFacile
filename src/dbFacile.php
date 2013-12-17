@@ -40,12 +40,34 @@ abstract class dbFacile {
 	 * TODO: Recommend and enforce use of these methods
 	 * Factory-ish static methods for instantiating driver-specific subclasses
 	 */
+	public static function mysql() {
+		require_once('dbFacile_mysql.php');
+		$o = new dbFacile_mysql();
+		return $o;
+	}
 	public static function mysqli() {
 		if (method_exists('mysqli_result', 'fetch_all')) {
+			require_once('dbFacile_mysqli.php');
 			$o = new dbFacile_mysqli();
 		} else {
+			require_once('dbFacile_mysqli2.php');
 			$o = new dbFacile_mysqli2();
 		}
+		return $o;
+	}
+	public static function postgresql() {
+		require_once('dbFacile_postgresql.php');
+		$o = new dbFacile_postgresql();
+		return $o;
+	}
+	public static function sqlite2() {
+		require_once('dbFacile_sqlite2.php');
+		$o = new dbFacile_sqlite2();
+		return $o;
+	}
+	public static function sqlite3() {
+		require_once('dbFacile_sqlite3.php');
+		$o = new dbFacile_sqlite3();
 		return $o;
 	}
 

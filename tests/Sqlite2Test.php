@@ -1,5 +1,5 @@
 <?php
-include_once('../src/dbFacile_sqlite2.php');
+include_once('../src/dbFacile.php');
 include_once('Sqlite3Test.php');
 
 /*
@@ -19,13 +19,13 @@ class Sqlite2Test extends Sqlite3Test {
 	);
 
 	public static function setUpBeforeClass() {
-                $db = new dbFacile_sqlite2();
+		$db = dbFacile::sqlite2();
 		$db->open('sqlite2.db');
 		$db->execute('create table test (b integer primary key auto_increment, c text)');
 	}
 
-        protected function setUp() {
-                $db = new dbFacile_sqlite2();
+	protected function setUp() {
+		$db = dbFacile::sqlite2();
 		$db->open('sqlite2.db');
 		$this->db = $db;
 	}

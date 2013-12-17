@@ -1,6 +1,6 @@
 <?php
 date_default_timezone_set('America/Los_Angeles');
-include_once('../src/dbFacile_sqlite3.php');
+include_once('../src/dbFacile.php');
 
 /*
 Would really like for tests to assert format of constructed SQL queries given varied base SQL and parameter arrays
@@ -19,14 +19,14 @@ class Sqlite3Test extends PHPUnit_Framework_TestCase {
 	);
 
 	public static function setUpBeforeClass() {
-                $db = new dbFacile_sqlite3();
+		$db = dbFacile::sqlite3();
 		$db->open('sqlite3.db');
 		$db->execute('create table test (b integer primary key autoincrement, c text)');
 		$db->execute('create table test2 (b integer primary key, c text)');
 	}
 
-        protected function setUp() {
-                $db = new dbFacile_sqlite3();
+	protected function setUp() {
+		$db = dbFacile::sqlite3();
 		$db->open('sqlite3.db');
 		$this->db = $db;
 	}
