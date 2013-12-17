@@ -15,7 +15,7 @@ Setup and Installation
 
 This was updated on Dec 16, 2013. We now use something resembling the factory pattern for instantiating the correct dbFacile driver subclass. There was an issue where certain versions of the mysqli driver were missing a method; using a factory allows us to elegantly work around this. More info: https://github.com/alanszlosek/dbFacile/pull/8
 
-1. Include the appropriate dbFacile.php
+1. Include dbFacile.php
 2. Get an instance of the correct driver class: $db = dbFacile::mysqli()
 3. Call $db->open(DATABASE, USERNAME, PASSWORD, HOST), passing the appropriate parameters
 
@@ -27,7 +27,7 @@ Connection Example
 
 Connect using MySQLi module, and a persistent connection
 
-    $db = new dbFacile_mysqli();
+    $db = dbFacile::mysqli();
     $db->open('testDB', 'testUser', 'testPass', 'p:192.168.1.15');
 		
 Additional Notes
