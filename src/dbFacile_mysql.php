@@ -29,7 +29,7 @@ class dbFacile_mysql extends dbFacile {
 		return mysql_num_rows($result);
 	}
 
-	public function open($database, $user, $password, $host = 'localhost', $charset = 'utf-8') {
+	public function open($database, $user, $password, $host = 'localhost', $charset = 'utf8') {
 		$this->database = $database;
 		// force opening a new link because we might be selecting a different database
 		$this->connection = mysql_connect($host, $user, $password, true);

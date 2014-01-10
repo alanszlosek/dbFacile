@@ -50,7 +50,7 @@ class dbFacile_mysqli extends dbFacile {
 		}
 	}
 
-	public function open($database, $user, $password, $host='localhost', $charset='utf-8') {
+	public function open($database, $user, $password, $host='localhost', $charset='utf8') {
 		// force opening a new link because we might be selecting a different database
 		$mysqli = new mysqli($host, $user, $password, $database);
 		if ($mysqli->connect_error) {
