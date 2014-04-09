@@ -10,19 +10,19 @@ class Sqlite3Test extends PHPUnit_Framework_TestCase {
 	protected $db;
 
 	protected $rows1 = array(
-		array('b' => 1, 'c' => 'aaa'),
-		array('b' => 2, 'c' => 'bbb'),
-		array('b' => 3, 'c' => 'ccc')
+		array('id' => 1, 'name' => 'aaa'),
+		array('id' => 2, 'name' => 'bbb'),
+		array('id' => 3, 'name' => 'ccc')
 	);
 	protected $rows2 = array(
-		array('id' => '1', 'name' => 'Hello')
+		array('itemId' => '1', 'tag' => 'Hello')
 	);
 
 	public static function setUpBeforeClass() {
 		$db = dbFacile::sqlite3();
 		$db->open('sqlite3.db');
-		$db->execute('create table test (b integer primary key autoincrement, c text)');
-		$db->execute('create table test2 (b integer primary key, c text)');
+		$db->execute('create table users (id integer primary key autoincrement, name text, added integer)');
+		$db->execute('create table tags (itemId integer primary key, tag text)');
 	}
 
 	protected function setUp() {
@@ -37,34 +37,34 @@ class Sqlite3Test extends PHPUnit_Framework_TestCase {
 		unlink('sqlite3.db');
 	}
 
-        public function testInsertReportsKey() {
+	public function testInsertReportsKey() {
 		$db = $this->db;
-		$row = $this->rows1[0];
-		unset($row['b']);
-		$a = $db->insert($row, 'test');
-		$this->assertEquals($a, 1);
+		$row = $check = $this->rows1[0];
+		unset($row['id']);
+		$a = $db->insert($row, 'users');
+		$this->assertEquals($a, $check['id']);
 
-		$row = $this->rows1[1];
-		unset($row['b']);
-		$a = $db->insert($row, 'test');
-		$this->assertEquals($a, 2);
+		$row = $check = $this->rows1[1];
+		unset($row['id']);
+		$a = $db->insert($row, 'users');
+		$this->assertEquals($a, $check['id']);
 
-		$row = $this->rows1[2];
-		unset($row['b']);
-		$a = $db->insert($row, 'test');
-		$this->assertEquals($a, 3);
+		$row = $check = $this->rows1[2];
+		unset($row['id']);
+		$a = $db->insert($row, 'users');
+		$this->assertEquals($a, $check['id']); 
 	}
 
-	public function testInsertNoKey() {
+	public function testInsertNoAuto() {
 		$db = $this->db;
 		$row = array(
-			'b' => 123,
-			'c' => 'testing'
+			'itemId' => 123,
+			'tag' => 'testing'
 		);
-		$a = $db->insert($row, 'test2');
+		$a = $db->insert($row, 'tags');
 		$this->assertEquals(true, $a);
 
-		$row2 = $db->fetchRow('select * from test2 where b=#', array(123));
+		$row2 = $db->fetchRow('select * from tags where itemId=#', array(123));
 		$this->assertEquals($row, $row2);
 	}
 
@@ -73,7 +73,7 @@ class Sqlite3Test extends PHPUnit_Framework_TestCase {
 
 	public function testFetchAll() {
 		$db = $this->db;
-		$rows = $db->fetchRows('select * from test order by b');
+		$rows = $db->fetchRows('select id,name from users order by id');
 		foreach($rows as $i => $row) {
 			$this->assertEquals( $this->rows1[ $i ], $row);
 		}
@@ -81,7 +81,7 @@ class Sqlite3Test extends PHPUnit_Framework_TestCase {
 
 	public function testPlaceholders() {
 		$db = $this->db;
-		$rows = $db->fetchRows('select * from test where b > # order by b', array(1));
+		$rows = $db->fetchRows('select id,name from users where id > # order by id', array(1));
 		foreach($rows as $i => $row) {
 			$this->assertEquals( $this->rows1[ $i+1 ], $row);
 		}
@@ -89,7 +89,7 @@ class Sqlite3Test extends PHPUnit_Framework_TestCase {
 
 	public function testAsIsPlaceholders() {
 		$db = $this->db;
-		$rows = $db->fetchRows('select * from test where b > # or b > # order by b', array(1,1));
+		$rows = $db->fetchRows('select id,name from users where id > # or id > # order by id', array(1,1));
 		foreach($rows as $i => $row) {
 			$this->assertEquals( $this->rows1[ $i+1 ], $row);
 		}
@@ -97,25 +97,25 @@ class Sqlite3Test extends PHPUnit_Framework_TestCase {
 
 	public function testFetchRow() {
 		$db = $this->db;
-		$row = $db->fetchRow('select * from test where b = #', array(2));
+		$row = $db->fetchRow('select id,name from users where id = #', array(2));
 		$this->assertEquals( $this->rows1[ 1 ], $row);
 	}
 
 	public function testFetchCell() {
 		$db = $this->db;
-		$row = $db->fetchCell('select b,c from test where b = #', array(3));
+		$row = $db->fetchCell('select id,name from users where id = #', array(3));
 		$this->assertEquals($row, 3);
 	}
 
 	public function testFetchColumn() {
 		$db = $this->db;
-		$row = $db->fetchColumn('select b from test where b > 1 order by b');
+		$row = $db->fetchColumn('select id from users where id > 1 order by id');
 		$this->assertEquals($row, array(2,3));
 	}
 
 	public function testFetchKeyValue() {
 		$db = $this->db;
-		$row = $db->fetchKeyValue('select b,c from test where b > 1 order by b');
+		$row = $db->fetchKeyValue('select id,name from users where id > 1 order by id');
 		$data = array(
 			2 => 'bbb',
 			3 => 'ccc'
@@ -126,37 +126,47 @@ class Sqlite3Test extends PHPUnit_Framework_TestCase {
 	// Update non-existent row?
 	public function testUpdate() {
 		$db = $this->db;
-		$data = array('c' => date('Y-m-d H:i:s'));
-		$db->update($data, 'test', 'b=?', array(3));
+		$data = array('name' => date('Y-m-d H:i:s'));
+		$db->update($data, 'users', 'id=?', array(3));
 
-		$row = $db->fetchRow('select b,c from test where b=3');
-		$data['b'] = 3;
+		$row = $db->fetchRow('select id,name from users where id=3');
+		$data['id'] = 3;
 		$this->assertEquals($data, $row);
+	}
+
+	public function testUpdateNumeric() {
+		$db = $this->db;
+		$data = array('added', 5498, 'name' => 'Germy');
+		$db->update($data, 'users', 'id=?', array(3));
+    
+		$row = $db->fetchRow('select name,added from users where id=3');
+		$this->assertEquals(5498, $row['added']);
+		$this->assertEquals('Germy', $row['name']);
 	}
 
 	public function testInsert() {
 		$db = $this->db;
-		$data = array('c' => 'new');
-		$db->insert($data, 'test');
+		$data = array('name' => 'new');
+		$db->insert($data, 'users');
 
-		$row = $db->fetchRow('select b,c from test where b=4');
-		$data['b'] = 4;
+		$row = $db->fetchRow('select id,name from users where id=4');
+		$data['id'] = 4;
 		$this->assertEquals($data, $row);
 	}
 
 	public function testDeleteWhereString() {
 		$db = $this->db;
-		$db->delete('test', 'b=?', array('2'));
-		$row = $db->fetchRow('select b,c from test where b=?', array('2'));
+		$db->delete('users', 'id=?', array('2'));
+		$row = $db->fetchRow('select id,name from users where id=?', array('2'));
 		$this->assertEquals(false, $row);
 	}
 
 	public function testDeleteWhereArray() {
 		$db = $this->db;
-		$data = array('c' => 'new');
-		$ret = $db->delete('test', $data);
+		$data = array('name' => 'new');
+		$ret = $db->delete('users', $data);
 		$this->assertEquals(1, $ret);
-		$row = $db->fetchRow('select b,c from test where c=?', array('new'));
+		$row = $db->fetchRow('select id,name from users where name=?', array('new'));
 		$this->assertEquals(false, $row);
 	}
 }

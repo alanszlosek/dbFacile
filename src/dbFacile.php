@@ -134,7 +134,15 @@ abstract class dbFacile {
 	public function update($data, $table, $where = null, $parameters = array()) {
 		$sql = 'update ' . $this->quoteField($table) . ' set ';
 		foreach($data as $key => $value) {
+			// Numeric keys are how we allow numeric values to be used in update()
+			// They come in pairs, alongside other data ... array('fieldName', 'fieldValue', ... 'title' => 'Something')
+			if (is_int($key)) {
+				if ($key % 2 == 0) {
+					$sql .= $this->quoteField($value) . '=' . $data[ $key+1 ] . ',';
+				}
+			} else {
 			$sql .= $this->quoteField($key) . '=' . $this->quoteEscapeString($value) . ',';
+			}
 		}
 		$sql = substr($sql, 0, -1); // strip off last comma
 

@@ -7,10 +7,10 @@ class MysqliTest extends Sqlite3Test {
 	public static function setUpBeforeClass() {
 		$db = dbFacile::mysqli();
 		$db->open('dbFacile', 'dbfacile', 'dbfacile');
-		$db->execute('drop table if exists test');
-		$db->execute('drop table if exists test2');
-		$db->execute('create table test (b int(11) primary key auto_increment, c text)');
-		$db->execute('create table test2 (b int(11) primary key, c text)');
+		$db->execute('drop table if exists users');
+		$db->execute('drop table if exists tags');
+		$db->execute('create table users (id int(11) primary key auto_increment, name text, added int(11))');
+		$db->execute('create table tags (itemId int(11) primary key, tag text)');
 	}
 
 	protected function setUp() {
