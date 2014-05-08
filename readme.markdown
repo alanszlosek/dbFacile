@@ -39,46 +39,60 @@ Additional Notes
 Fetching Data
 ----
 
-Returns an array of rows. Each row is an associative array of field=>value.
-If there are no rows, and empty array is returned (so you won't get PHP notices if you try to loop over the result).
+**Fetch Rows**
+
+Returns an array of rows. Each row is an associative array of field=>value. If there are no rows, an empty array is returned (so you won't get PHP notices if you try to loop over the result).
 
     $rows = $db->fetchRows('select * from users')
     foreach($rows as $row) {
         echo $row['email'] . '<br />';
     }
 
+**Fetch a single row**
+
 Returns associative array of fields and values. If row doesn't exist, return value may be null or false. Probably should unify this.
 
     $row = $db->fetchRow('select * from users');
 
-Returns first field from this final query: "select email from users where name='Alan'". null if row doesn't exist.
+**Fetch a single value from a single row**
 
-    $email = $db->fetchCell('select email from users where name=?', array('Alan'));
+Returns first field from the first row.
 
-Returns first field from this final query: "select email from users where date_created<1231231234"
+    $email = $db->fetchCell("select email from users where name='Alan'");
 
-    $email = $db->fetchCell('select email from users where date_created<#', array('unix_timestamp()'));
+**Fetch a column of data**
 
 Returns a one-dimensional, numerically-indexed array of column values. Empty array if there are no rows.
 
     $emailAddresses = $db->fetchColumn('select email from users');
 
-Returns an associative array with users.id as the key and users.email as the value for each. Specify more than 2 fields and the key points to a numerically-indexed array of the remaining field values
+**Fetch data as a key value pair**
+
+Returns an associative array with users.id as the key and users.email as the value for each. Specify more than 2 fields and the value will contain a numerically-indexed array of the remaining field values.
 
     $idToEmail = $db->fetchKeyValue('select id,email from users');
+
+**Fetch using query parameters**
+
+Returns the first row from this final query: "select email from users where date_created<1231231234"
+
+    $row = $db->fetchRow('select email from users where date_created<#', array('unix_timestamp()'));
 
 Inserting and Updating Data
 ----
 
 Assuming a users table exists with name and email fields:
 
-Inserts associative array of data into table, returns newly generated primary key.
+**Insert a row**
+
+Inserts using an associative array of data, returns newly generated primary key (if table generates a key automatically).
 Returns false if the insertion failed.
 Returns 0 if no key was generated.
 
     $data = array('name' => 'Aiden', 'email' => 'aiden@gmail.com');
     $id = $db->insert($data, 'users');
 
+**Update rows**
 
 Updates rows, setting name to 'Aideen' where name was 'Aiden'
 
