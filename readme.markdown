@@ -68,7 +68,7 @@ Returns a one-dimensional, numerically-indexed array of column values. Empty arr
 
 **Fetch data as a key value pair**
 
-Returns an associative array with users.id as the key and users.email as the value for each. Specify more than 2 fields and the value will contain a numerically-indexed array of the remaining field values.
+Returns an associative array using values from users.id as keys and values from users.email as corresponding values. Specify more than 2 fields and the value will contain a numerically-indexed array of the remaining field values.
 
     $idToEmail = $db->fetchKeyValue('select id,email from users');
 
