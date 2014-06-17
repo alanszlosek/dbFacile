@@ -226,14 +226,32 @@ abstract class dbFacile {
 
 		$data = array();
 		foreach($this->_fetchAll($result) as $row) {
-			$key = array_shift($row);
-			if(sizeof($row) == 1) { // if there were only 2 fields in the result
-				// use the second for the value
-				$data[ $key ] = array_shift($row);
+			if(sizeof($row) == 2) { // if there were only 2 fields in the result
+				// use first column's value for key, second for value
+				$data[ reset($row) ] = next($row);
 			} else { // if more than 2 fields were fetched
-				// use the array of the rest as the value
-				$data[ $key ] = $row;
+				trigger_error('dbFacile - fetchKeyValue() will soon only return key/value pairs. Use fetchKeyedRows() if you want each row indexed by a custom key', E_USER_DEPRECATED);
+				// use the full row as the value
+				// DEPRECATION NOTICE
+				$data[ reset($row) ] = $row;
 			}
+		}
+		return $data;
+	}
+
+	/*
+	 * Should be passed a query that fetches at least two fields
+	 * The first field's value will become the array key
+	 * The array value will be the full row
+	 */
+	public function fetchKeyedRows($sql, $parameters = array()) {
+		$result = $this->execute($sql, $parameters);
+		if(!$result) return array();
+
+		$data = array();
+		foreach($this->_fetchAll($result) as $row) {
+			// use first column's value for key
+			$data[ reset($row) ] = $row;
 		}
 		return $data;
 	}

@@ -1,8 +1,7 @@
 <?php
-require_once('../src/dbFacile.php');
-require('Sqlite3Test.php');
+require('CommonTestQueries.php');
 
-class MysqliTest extends Sqlite3Test {
+class MysqliTest extends CommonTestQueries {
 
 	public static function setUpBeforeClass() {
 		$db = dbFacile::mysqli();
