@@ -67,21 +67,20 @@ class CommonTestQueries extends \PHPUnit_Framework_TestCase
         }
     }
 
+    public function testFetchRowsIn()
+    {
+        $db = $this->db;
+        $rows = $db->fetchRows('select id,name from users where id IN ', array(1,3), ' order by id');
+        $this->assertEquals($this->rows1[0], $rows[0]);
+        $this->assertEquals($this->rows1[2], $rows[1]);
+    }
+
     public function testQueryParts()
     {
         $db = $this->db;
         $id = 1;
         $name = 'aaa';
         $rows = $db->fetchRows('select id,name from users where id>', $id, ' AND name<>', $name, ' order by id');
-        foreach ($rows as $i => $row) {
-            $this->assertEquals( $this->rows1[ $i+1 ], $row);
-        }
-    }
-
-    public function testAsIsPlaceholders()
-    {
-        $db = $this->db;
-        $rows = $db->fetchRows('select id,name from users where id > ', 1, ' or id > ', 1, ' order by id');
         foreach ($rows as $i => $row) {
             $this->assertEquals( $this->rows1[ $i+1 ], $row);
         }

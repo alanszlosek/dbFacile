@@ -375,8 +375,13 @@ abstract class dbFacile
         $sql = '';
         foreach ($parts as $i => $part) {
             if ($i % 2) {
-                // Odd elements are values that need to be quoted+escaped
-                $sql .= $this->quoteEscapeString($part);
+                if (is_array($part)) {
+                    // If we were handed an array, assume it's for an "IN ()" expression
+                    $sql .= '(' . implode(',', $part) . ')';
+                } else {
+                    // Odd elements are values that need to be quoted+escaped
+                    $sql .= $this->quoteEscapeString($part);
+                }
             } else {
                 $sql .= $part;
             }
