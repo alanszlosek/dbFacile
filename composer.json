@@ -1,0 +1,6 @@
+{
+    "name": "dbFacile",
+    "autoload": {
+        "psr-4": {"dbFacile\\": "src/dbFacile/"}
+    }
+}

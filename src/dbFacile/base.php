@@ -2,25 +2,10 @@
 namespace dbFacile;
 
 /*
-dbFacile - A Database abstraction that should have existed from the start
-Version 0.6
-See LICENSE for license details.
-
-Because, fuck placeholders
-
-TODO: IN() with arrays
-TODO: update tests to include numeric key/value pairs in where array
-TODO: update readme with API changes, new features, and new version (inspired by dA tools ... never liked query params/placeholders)
-
-could do:
-    $where = array(
-        'page' => '/about.html'
-    );
-    $rows = $db->fetchRows('select page,timestamp from visits', dbFacile::whereHash($where));
-    // but maybe that's too much
+dbFacile - base class, which driver classes extend 
 */
 
-abstract class dbFacile
+abstract class base
 {
     protected $connection; // handle to Database connection
     protected $logFile;
@@ -53,51 +38,6 @@ abstract class dbFacile
         $this->connection = $handle;
     }
 
-    /**
-     * TODO: Recommend and enforce use of these methods
-     * Factory-ish static methods for instantiating driver-specific subclasses
-     */
-    public static function mysql()
-    {
-        require_once 'dbFacile_mysql.php';
-        $o = new dbFacile_mysql();
-
-        return $o;
-    }
-    public static function mysqli()
-    {
-        if (method_exists('mysqli_result', 'fetch_all')) {
-            require_once 'dbFacile_mysqli.php';
-            $o = new dbFacile_mysqli();
-        } else {
-            require_once 'dbFacile_mysqli2.php';
-            $o = new dbFacile_mysqli2();
-        }
-
-        return $o;
-    }
-    public static function postgresql()
-    {
-        require_once 'dbFacile_postgresql.php';
-        $o = new dbFacile_postgresql();
-
-        return $o;
-    }
-    public static function sqlite2()
-    {
-        require_once 'dbFacile_sqlite2.php';
-        $o = new dbFacile_sqlite2();
-
-        return $o;
-    }
-    public static function sqlite3()
-    {
-        require_once 'dbFacile_sqlite3.php';
-        $o = new dbFacile_sqlite3();
-
-        return $o;
-    }
-
     /*
      * Performs a query using the given string.
      * Used by the other _query functions.
@@ -110,9 +50,24 @@ abstract class dbFacile
     {
         $this->fullSQL = $this->makeQuery($queryParts);
 
-        // Should look up ay PHP-FIG logging interface recommendations, so I can support query logging
+        /*
+        if($this->logFile)
+            $time_start = microtime(true);
+        */
+
         $result = $this->_query($this->fullSQL); // sets $this->result
         $this->_queryCount++;
+
+        /*
+        // Should look up ay PHP-FIG logging interface recommendations ...
+        if ($this->logFile) {
+            $time_end = microtime(true);
+            fwrite($this->logFile, date('Y-m-d H:i:s') . "\n" . $fullSql . "\n" . number_format($time_end - $time_start, 8) . " seconds\n\n");
+        }
+
+        if(!$this->result && (error_reporting() & 1))
+            trigger_error('dbFacile - Error in query: ' . $this->query . ' : ' . $this->_error(), E_USER_WARNING);
+        */
 
         // I know getting a real true or false is handy,
         // but returning the result handle gives more flexibility
@@ -145,6 +100,7 @@ abstract class dbFacile
         $sql = 'insert into ' . $this->quoteField($table) . ' (' . implode(',', $fields) . ') values(' . implode(',', $values) . ')';
         $result = $this->execute($sql);
         if (!$result) {
+            // Error
             return false;
         }
         $id = $this->lastID($table);
@@ -176,23 +132,26 @@ abstract class dbFacile
             }
         }
         $sql = substr($sql, 0, -1); // strip off last comma
-        $sql .= $this->whereHelper($args);
+
+        if ($args) {
+            $sql .= $this->whereHelper($args);
+        }
         $result = $this->execute($sql);
 
         return $this->affectedRows($result);
     }
 
-
     // @args: table, where
     public function delete($table, $whereHash = array())
     {
         $args = func_get_args();
-        array_shift($args);
+        $table = array_shift($args);
 
         $sql = 'DELETE FROM ' . $this->quoteField($table);
-        $sql .= $this->whereHelper($args);
+        if ($args) {
+            $sql .= $this->whereHelper($args);
+        }
         $result = $this->execute($sql);
-
         return $this->affectedRows($result);
     }
 
@@ -204,7 +163,6 @@ abstract class dbFacile
     public function fetch($sql)
     {
         $result = $this->_execute(func_get_args());
-
         return $this->_fetch($result);
     }
 
@@ -216,9 +174,10 @@ abstract class dbFacile
     public function fetchRows($sql)
     {
         $result = $this->_execute(func_get_args());
-        if($result)
-
+        if ($result)
+        {
             return $this->_fetchAll($result);
+        }
         return array();
     }
     // Alias of fetchRows()
@@ -234,6 +193,7 @@ abstract class dbFacile
     {
         $result = $this->_execute(func_get_args());
         if ($result) {
+
             $row = $this->_fetchRow($result);
             if (!$row) return null;
             return array_shift($row); // shift first field off first row
@@ -314,12 +274,11 @@ abstract class dbFacile
     {
         $result = $this->_execute(func_get_args());
         // not all results look like resources, so I don't think is_resource($result) is portable
-        if($result)
-
+        if ($result) {
             return $this->_fetchRow($result);
+        }
         return null;
     }
-
 
     // These are defaults, since these statements are common across a few DBMSes
     // Override in driver class if they are incorrect
@@ -349,44 +308,61 @@ abstract class dbFacile
         return "'" . $this->escapeString($value) . "'";
     }
 
-    protected function whereHelper($where)
+    protected function whereHelper($where) {
+        if (count($where) > 1) {
+            return $this->whereAlternations($where);
+        } elseif ($where) {
+            return $this->whereHash($where[0]);
+        }
+    }
+
+    protected function whereHash($where)
     {
         if (!$where) {
             return;
         }
         $sql = ' WHERE ';
-        if (is_array($where[0])) {
-            foreach ($where[0] as $key => $value) {
+        foreach ($where as $key => $value) {
+            if (is_array($value)) {
+                $sql .= $this->quoteField($key) . ' IN (' . implode(',', $value) . ' AND ';
+            } else {
                 $sql .= $this->quoteField($key) . '=' . $this->quoteEscapeString($value) . ' AND ';
             }
-
-            return substr($sql, 0, -4);
-        } else {
-            return ' WHERE ' . $this->makeQuery($where);
         }
+        return substr($sql, 0, -4);
     }
-
+    protected function whereAlternations($where)
+    {
+        // empty array
+        if (!$where) {
+            return;
+        }
+        $sql = ' WHERE ';
+        $sql .= $this->makeQuery($where);
+        return $sql;
+    }
     /**
-     * Takes an array of query parts ... the even numbered indexes must constain strings
+     * Takes an array of query parts ... the even numbered indexes must contain strings
      * The odd indexes are expected to contain values that need to be quoted and escaped for the final query
      */
     protected function makeQuery($parts)
     {
         $sql = '';
-        foreach ($parts as $i => $part) {
-            if ($i % 2) {
+        while ($parts)
+        {
+            $sql .= array_shift($parts);
+            if ($parts)
+            {
+                // uhh, this "IN (1,2,3)" stuff is annoying
+                $part = array_shift($parts);
                 if (is_array($part)) {
-                    // If we were handed an array, assume it's for an "IN ()" expression
-                    $sql .= '(' . implode(',', $part) . ')';
+                    $sql .= ' (' . implode(',', $part) . ')';
                 } else {
                     // Odd elements are values that need to be quoted+escaped
                     $sql .= $this->quoteEscapeString($part);
                 }
-            } else {
-                $sql .= $part;
             }
         }
-
         return $sql;
     }
 }

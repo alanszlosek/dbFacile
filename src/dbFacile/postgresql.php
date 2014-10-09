@@ -1,10 +1,7 @@
 <?php
 namespace dbFacile;
-if (!class_exists('dbFacile')) {
-        require_once 'dbFacile.php';
-}
 
-class dbFacile_postgresql extends dbFacile
+class postgresql extends \dbFacile\base
 {
     public function affectedRows($result = null)
     {

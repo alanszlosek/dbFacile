@@ -1,8 +1,5 @@
 <?php
 namespace dbFacile;
-if (!class_exists('dbFacile')) {
-        require_once 'dbFacile.php';
-}
 
 /*
  * To create a new driver, implement the following:
@@ -23,7 +20,7 @@ if (!class_exists('dbFacile')) {
  * public close
  * */
 
-class dbFacile_sqlite2 extends dbFacile
+class sqlite2 extends \dbFacile\base
 {
     public function affectedRows($result = null)
     {

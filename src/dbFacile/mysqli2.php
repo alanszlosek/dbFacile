@@ -1,13 +1,12 @@
 <?php
 namespace dbFacile;
-require_once 'dbFacile_mysqli.php';
 
 /**
  * This class works around the lack of a fetch_all method on some mysqli drivers.
  * Originally reported by mbutomax on Github
  * Reported here: https://github.com/alanszlosek/dbFacile/pull/8
  */
-class dbFacile_mysqli2 extends dbFacile_mysqli
+class mysqli2 extends \dbFacile\base
 {
     protected function _fetchAll($result)
     {

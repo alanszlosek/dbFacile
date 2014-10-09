@@ -1,7 +1,7 @@
 <?php
 namespace dbFacile;
 
-class dbFacile_mssql extends dbFacile
+class mssql extends \dbFacile\base
 {
     public function beginTransaction()
     {

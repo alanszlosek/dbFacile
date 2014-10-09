@@ -1,11 +1,7 @@
 <?php
 namespace dbFacile;
 
-if (!class_exists('dbFacile')) {
-    require_once 'dbFacile.php';
-}
-
-class dbFacile_mysql extends dbFacile
+class mysql extends \dbFacile\base
 {
     public function affectedRows($result = null)
     {

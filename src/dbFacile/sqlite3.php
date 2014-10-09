@@ -1,10 +1,7 @@
 <?php
 namespace dbFacile;
-if (!class_exists('dbFacile')) {
-        require_once 'dbFacile.php';
-}
 
-class dbFacile_sqlite3 extends dbFacile
+class sqlite3 extends \dbFacile\base
 {
     public function affectedRows($result = null)
     {
