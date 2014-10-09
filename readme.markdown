@@ -115,24 +115,36 @@ Returns 0 if no key was generated.
 
 Updates rows, setting name to 'Aideen' where name was 'Aiden'
 
-    $data = array('name' => 'Aideen');
-    $db->update('users', $data, 'name=', 'Aiden');
+    $set_data = array('name' => 'Aideen');
+    $db->update('users', $set_data, 'name=', 'Aiden');
 
 You can also pass an associative array as the where clause:
 
-    $data = array('name' => 'Aideen');
+    $set_data = array('name' => 'Aideen');
     $where = array('name' => 'Aiden');
-    $db->update('users', $data, $where);
+    $db->update('users', $set_data, $where);
 
 Note: As used above, all values present in the associative arrays will be escaped and quoted.
 
 If you need more control over your where clause, use a combination of a string and parameters:
 
-    $data = array('name' => 'John');
+    $set_data = array('name' => 'John');
     $id = 3;
     $email = 'a@g.com';
     // SQL will be "update users set name='John' where id>='3' and email='a@g.com'"
-    $db->update($data, 'users', 'id>=', $id, ' and email=', $email);
+    $db->update('users', $set_data, 'id>=', $id, ' and email=', $email);
+
+**Delete rows**
+
+Using a string where clause. "delete from users where id<'123'"
+
+    $cutoff = 123;
+    $num_deleted = $db->delete('users', 'id<', $cutoff);
+
+Using an associative-array/hash for the where clause. "delete from users where id IN (1,2,3)"
+
+    $where_data = array('id' => array(1,2,3));
+    $num_deleted = $db->delete('users', $where_data);
 
 Transactions
 ----
