@@ -44,7 +44,7 @@ class mysqli extends \dbFacile\base
     {
         $id = $this->connection->insert_id;
         // $id will be 0 if insert succeeded, but statement didn't generate a new id (no auto-increment)
-        if ($id == 0) return false;
+        if ($id == 0) return true;
         return $id;
     }
 

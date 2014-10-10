@@ -29,10 +29,12 @@ class postgresql extends \dbFacile\base
 
     public function lastID($table = null)
     {
+        // this is probably wrong
         $sequence = $this->fetchCell("SELECT relname FROM pg_class WHERE relkind = 'S' AND relname LIKE '" . $table . "_%'");
         if(strlen($sequence))
-
+        {
             return $this->fetchCell('select last_value from ' . $sequence);
+        }
         return false;
     }
 

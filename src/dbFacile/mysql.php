@@ -27,7 +27,7 @@ class mysql extends \dbFacile\base
     {
         $id = mysql_insert_id($this->connection);
         // $id will be 0 if insert succeeded, but statement didn't generate a new id (no auto-increment)
-        if ($id == 0) return false;
+        if ($id == 0) return true;
         return $id;
     }
 

@@ -49,7 +49,7 @@ class CommonTestQueries extends \PHPUnit_Framework_TestCase
             'tag' => 'testing'
         );
         $a = $db->insert('tags', $row);
-        $this->assertEquals(true, $a);
+        $this->assertEquals(123, $a);
 
         $row2 = $db->fetchRow('select * from tags where itemId=123');
         $this->assertEquals($row, $row2);
@@ -57,6 +57,10 @@ class CommonTestQueries extends \PHPUnit_Framework_TestCase
 
     public function testInsertEmpty()
     {
+        $db = $this->db;
+        // Test empty insert
+        $id = $db->insert('users');
+        $this->assertEquals(4, $id);
     }
 
     public function testFetchAll()

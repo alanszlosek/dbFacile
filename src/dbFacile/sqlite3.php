@@ -35,10 +35,8 @@ class sqlite3 extends \dbFacile\base
 
     public function lastID($table = null)
     {
-        $id = $this->connection->lastInsertRowID();
         // SQLite returns true if last statement didn't generate an id
-        if ($id === true) return false;
-        return $id;
+        return $this->connection->lastInsertRowID();
     }
 
     public function numberRows($result)
@@ -91,6 +89,14 @@ class sqlite3 extends \dbFacile\base
     protected function _fetchRow($result)
     {
         return $result->fetchArray(SQLITE3_ASSOC);
+    }
+
+    // Sqlite3 supports "INSERT ... DEFAULT VALUES" syntax for empty inserts
+    protected function _insert($table, $data = array()) {
+        if (!$data) {
+            return 'INSERT INTO ' . $this->quoteField($table) . ' DEFAULT VALUES';
+        }
+        return parent::_insert($table, $data);
     }
 
     protected function _query($sql)
