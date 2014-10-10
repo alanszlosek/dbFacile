@@ -92,7 +92,6 @@ abstract class base
     {
         $fields = array();
         $values = array();
-        // Only loop once ... say by to 2 array_map() + 2 call_user_func() calls
         foreach ($data as $key => $value) {
             $fields[] = $this->quoteField($key);
             $values[] = $this->quoteEscapeString($value);
@@ -356,10 +355,10 @@ abstract class base
                 // uhh, this "IN (1,2,3)" stuff is annoying
                 $part = array_shift($parts);
                 if (is_array($part)) {
-                    $sql .= ' (' . implode(',', $part) . ')';
+                    $sql .= ' (' . implode(',', $part) . ') ';
                 } else {
                     // Odd elements are values that need to be quoted+escaped
-                    $sql .= $this->quoteEscapeString($part);
+                    $sql .= $this->quoteEscapeString($part) . ' ';
                 }
             }
         }
