@@ -1,0 +1,7 @@
+{
+    "name": "alanszlosek/dbfacile",
+    "description": "Interact with databases in PHP5 with 1 line of code",
+    "namespaces": {
+        "dbFacile": "src/dbFacile"
+    }
+}
