@@ -6,7 +6,7 @@ namespace dbFacile;
  * Originally reported by mbutomax on Github
  * Reported here: https://github.com/alanszlosek/dbFacile/pull/8
  */
-class mysqli2 extends \dbFacile\base
+class mysqli2 extends \dbFacile\mysqli
 {
     protected function _fetchAll($result)
     {
