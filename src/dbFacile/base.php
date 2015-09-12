@@ -361,7 +361,7 @@ abstract class base
                 // uhh, this "IN (1,2,3)" stuff is annoying
                 $part = array_shift($parts);
                 if (is_array($part)) {
-                    $sql .= ' (' . implode(',', $part) . ')';
+                    $sql .= ' (' . implode(',', array_map(array($this,'quoteEscapeString'),$part)) . ')';
                 } else {
                     // Odd elements are values that need to be quoted+escaped
                     $sql .= $this->quoteEscapeString($part);
