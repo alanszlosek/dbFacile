@@ -2,7 +2,8 @@
 namespace dbFacile\tests;
 
 date_default_timezone_set('America/Los_Angeles');
-include_once '../vendor/autoload.php';
+//include_once '../vendor/autoload.php';
+require('../thi-autoload.php');
 
 /*
 Would really like for tests to assert format of constructed SQL queries given varied base SQL and parameter arrays
@@ -146,14 +147,17 @@ class CommonTestQueries extends \PHPUnit_Framework_TestCase
         $this->assertEquals($data, $row);
     }
 
-    public function testUpdateNumeric()
+    public function testUpdateUnescaped()
     {
         $db = $this->db;
-        $data = array('added', 5498, 'name' => 'Germy');
+        $data = array(
+            'added' => new \dbFacile\passthrough('54+3'),
+            'name' => 'Germy'
+        );
         $db->update('users', $data, 'id=', 3);
 
         $row = $db->fetchRow('select name,added from users where id=3');
-        $this->assertEquals(5498, $row['added']);
+        $this->assertEquals(57, $row['added']);
         $this->assertEquals('Germy', $row['name']);
     }
 
@@ -166,6 +170,18 @@ class CommonTestQueries extends \PHPUnit_Framework_TestCase
         $row = $db->fetchRow('select id,name from users where id=4');
         $data['id'] = 4;
         $this->assertEquals($data, $row);
+    }
+
+    public function testInsertUnescaped()
+    {
+        $db = $this->db;
+        $data = array(
+            'name' => new \dbFacile\passthrough("upper('herman')")
+        );
+        $id = $db->insert('users', $data);
+
+        $row = $db->fetchRow('select id,name from users where id=', $id);
+        $this->assertEquals('HERMAN', $row['name']);
     }
 
     public function testDeleteWhereString()

@@ -111,11 +111,25 @@ Returns 0 if no key was generated.
     $data = array('name' => 'Aiden', 'email' => 'aiden@gmail.com');
     $id = $db->insert('users', $data);
 
+To prevent escaping of certain values, wrap them in a passthrough class:
+
+    $data = array('userId' => 1, 'loginDateTime' => new \dbFacile\passthrough('now()'));
+    $id = $db->insert('user_logins', $data);
+
 **Update rows**
 
-Updates rows, setting name to 'Aideen' where name was 'Aiden'
+Updates rows, setting name to 'Aideen' where name was 'Aiden':
 
     $set_data = array('name' => 'Aideen');
+    $db->update('users', $set_data, 'name=', 'Aiden');
+
+To prevent escaping of certail values, wrap them in a passthrough class:
+
+    // add numerically-keyed items in pairs. field name first, then value
+    $set_data = array(
+        'visits' => 134,
+        'last_seen' => new \dbFacile\passthrough('now()')
+    );
     $db->update('users', $set_data, 'name=', 'Aiden');
 
 You can also pass an associative array as the where clause:
@@ -126,7 +140,7 @@ You can also pass an associative array as the where clause:
 
 Note: As used above, all values present in the associative arrays will be escaped and quoted.
 
-If you need more control over your where clause, use a combination of a string and parameters:
+If you need more control over your where clause, use alternating strings and parameters:
 
     $set_data = array('name' => 'John');
     $id = 3;

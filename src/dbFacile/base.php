@@ -108,7 +108,11 @@ abstract class base
         // Only loop once ... say by to 2 array_map() + 2 call_user_func() calls
         foreach ($data as $key => $value) {
             $fields[] = $this->quoteField($key);
-            $values[] = $this->quoteEscapeString($value);
+            if (is_a($value, '\dbFacile\passthrough')) {
+                $values[] = $value;
+            } else {
+                $values[] = $this->quoteEscapeString($value);
+            }
         }
         return 'insert into ' . $this->quoteField($table) . ' (' . implode(',', $fields) . ') values(' . implode(',', $values) . ')';
     }
@@ -127,11 +131,8 @@ abstract class base
         $sql = 'update ' . $this->quoteField($table) . ' set ';
         foreach ($data as $key => $value) {
             // Numeric keys are how we allow numeric values to be used in update()
-            if (is_int($key)) {
-                // They come in pairs: array('fieldName', 'fieldValue', ...)
-                if ($key % 2 == 0) {
-                    $sql .= $this->quoteField($value) . '=' . $data[ $key+1 ] . ',';
-                }
+            if (is_a($value, '\dbFacile\passthrough')) {
+                $sql .= $this->quoteField($key) . '=' . $value . ',';
             } else {
                 $sql .= $this->quoteField($key) . '=' . $this->quoteEscapeString($value) . ',';
             }
