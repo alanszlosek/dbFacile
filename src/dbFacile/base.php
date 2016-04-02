@@ -114,7 +114,7 @@ abstract class base
                 $values[] = $this->quoteEscapeString($value);
             }
         }
-        return 'insert into ' . $this->quoteField($table) . ' (' . implode(',', $fields) . ') values(' . implode(',', $values) . ')';
+        return 'INSERT INTO ' . $this->quoteField($table) . ' (' . implode(',', $fields) . ') VALUES(' . implode(',', $values) . ')';
     }
 
     /*
@@ -128,7 +128,7 @@ abstract class base
         array_shift($args);
         array_shift($args);
 
-        $sql = 'update ' . $this->quoteField($table) . ' set ';
+        $sql = 'UPDATE ' . $this->quoteField($table) . ' SET ';
         foreach ($data as $key => $value) {
             // Numeric keys are how we allow numeric values to be used in update()
             if (is_a($value, '\dbFacile\passthrough')) {
@@ -145,6 +145,33 @@ abstract class base
         $result = $this->execute($sql);
 
         return $this->affectedRows($result);
+    }
+
+    public function replace($table, $data = array())
+    {
+        $sql = $this->_replace($table, $data);
+        $result = $this->execute($sql);
+        if (!$result) {
+            // Error
+            return false;
+        }
+        // This should return true if insert succeeded, but no ID was generated
+        return $this->lastID($table);
+    }
+
+    protected function _replace($table, $data = array())
+    {
+        $fields = array();
+        $values = array();
+        foreach ($data as $key => $value) {
+            $fields[] = $this->quoteField($key);
+            if (is_a($value, '\dbFacile\passthrough')) {
+                $values[] = $value;
+            } else {
+                $values[] = $this->quoteEscapeString($value);
+            }
+        }
+        return 'REPLACE INTO ' . $this->quoteField($table) . ' (' . implode(',', $fields) . ') VALUES(' . implode(',', $values) . ')';
     }
 
     // @args: table, where
